@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 25
@@ -17,6 +19,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
@@ -24,7 +30,24 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    compile 'com.bluelinelabs:conductor:2.1.1'
+    compile 'com.bluelinelabs:conductor-support:2.1.1'
+
+    // RxJava 2
+    compile 'io.reactivex.rxjava2:rxjava:2.0.5'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+
+    // DI
+    compile 'com.google.dagger:dagger:2.9'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.9'
+
     testCompile 'junit:junit:4.12'
 }

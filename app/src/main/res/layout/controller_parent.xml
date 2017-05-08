@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
+        android:id="@+id/parent_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="56dp" />
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/main_bottom_navigation"
+        android:layout_gravity="bottom"
+        style="@style/BottomNavigationStyle"
+        android:layout_width="match_parent"
+        android:layout_height="56dp" />
+</FrameLayout>

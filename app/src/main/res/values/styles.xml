@@ -8,4 +8,14 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="BottomNavigationStyle" parent="Widget.Design.BottomNavigationView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/bottom_navigation_view_height</item>
+        <item name="android:background">@color/bottom_navigation_color</item>
+        <item name="itemIconTint">@color/bottom_navigation_menu_item_color</item>
+        <item name="itemTextColor">@color/bottom_navigation_menu_item_color</item>
+        <item name="menu">@menu/bottom_navigation</item>
+    </style>
+
+
 </resources>
