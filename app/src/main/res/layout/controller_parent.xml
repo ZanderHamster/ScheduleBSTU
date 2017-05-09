@@ -11,8 +11,9 @@
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/main_bottom_navigation"
-        android:layout_gravity="bottom"
         style="@style/BottomNavigationStyle"
         android:layout_width="match_parent"
-        android:layout_height="56dp" />
+        android:layout_height="56dp"
+        android:layout_gravity="bottom" />
+
 </FrameLayout>

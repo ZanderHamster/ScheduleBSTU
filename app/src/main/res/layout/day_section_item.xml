@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/day_section_item_layout"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/day_section_item_first_column"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:id="@+id/day_section_item_start_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="11:00"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/day_section_item_end_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/day_section_item_start_event"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="sans-serif-medium"
+            android:text="13:00"
+            android:textColor="@color/end_event_color"
+            android:textSize="16sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/day_section_item_second_column"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/day_section_item_first_column"
+        android:layout_toRightOf="@+id/day_section_item_first_column">
+
+        <TextView
+            android:id="@+id/day_section_item_event_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Лекция"
+            android:textColor="@color/event_type_color" />
+
+        <TextView
+            android:id="@+id/day_section_item_subject"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/day_section_item_event_type"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Программирование"
+            android:textColor="@color/black" />
+
+
+        <TextView
+            android:id="@+id/day_section_item_teacher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/day_section_item_subject"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Иванов М.В"
+            android:textColor="@color/teacher_name_color" />
+
+        <TextView
+            android:id="@+id/day_section_item_room"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/day_section_item_subject"
+            android:layout_alignBottom="@+id/day_section_item_subject"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="6dp"
+            android:layout_marginEnd="6dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="420В"
+            android:textColor="@color/teacher_name_color" />
+
+        <TextView
+            android:id="@+id/day_section_item_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/day_section_item_teacher"
+            android:layout_alignBottom="@+id/day_section_item_teacher"
+            android:layout_alignEnd="@+id/day_section_item_room"
+            android:layout_alignRight="@+id/day_section_item_room"
+            android:fontFamily="sans-serif-medium"
+            android:text="13-ИВТ1"
+            android:textColor="@color/teacher_name_color" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/day_section_item_border"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_below="@id/day_section_item_second_column"
+        android:src="@drawable/border_line_gray_1dp" />
+</RelativeLayout>

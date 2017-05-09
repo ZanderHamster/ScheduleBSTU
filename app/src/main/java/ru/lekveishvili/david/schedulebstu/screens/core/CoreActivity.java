@@ -15,7 +15,6 @@ import ru.lekveishvili.david.schedulebstu.screens.base.BaseActivity;
 import ru.lekveishvili.david.schedulebstu.screens.base.ParentController;
 
 public class CoreActivity extends BaseActivity {
-
     @BindView(R.id.core_controller_container)
     ChangeHandlerFrameLayout changeHandlerFrameLayout;
 
