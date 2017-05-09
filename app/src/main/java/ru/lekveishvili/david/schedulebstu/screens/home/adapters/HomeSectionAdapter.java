@@ -6,7 +6,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,8 +60,10 @@ public class HomeSectionAdapter extends StatelessSection {
                 String.valueOf(event.getTeacher().getThirdName().charAt(0)) + ".";
         String room = event.getRoom().getName();
         String group = event.getGroup().getName();
-        String startEvent = "11:30";
-        String endEvent = "13:20";
+        DateFormat df = new SimpleDateFormat("HH:mm", Locale.ROOT);
+        String startEvent = df.format(event.getStartEvent());
+        String endEvent = df.format(event.getEndEvent());
+
 
         itemHolder.eventType.setText(eventType);
         itemHolder.subject.setText(subject);
