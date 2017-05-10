@@ -59,38 +59,10 @@ public class HomeController extends BaseController {
     }
 
     private String convertDateToString(Date date) {
-        DateFormat week = new SimpleDateFormat("u", Locale.ROOT);
-        DateFormat dateMonth = new SimpleDateFormat("d", Locale.ROOT);
-        DateFormat month = new SimpleDateFormat("M", Locale.ROOT);
-        String dayOfWeek;
+        DateFormat dateMonth = new SimpleDateFormat("d", new Locale("ru", "RU"));
+        DateFormat month = new SimpleDateFormat("M", new Locale("ru", "RU"));
+        String dayOfWeek = (new SimpleDateFormat("EEEE", new Locale("ru", "RU"))).format(date);
         String monthOfYear;
-        switch (Integer.valueOf(week.format(date))) {
-            case 1:
-                dayOfWeek = "понедельник";
-                break;
-            case 2:
-                dayOfWeek = "вторник";
-                break;
-            case 3:
-                dayOfWeek = "среда";
-                break;
-            case 4:
-                dayOfWeek = "четверг";
-                break;
-            case 5:
-                dayOfWeek = "пятница";
-                break;
-            case 6:
-                dayOfWeek = "суббота";
-                break;
-            case 7:
-                dayOfWeek = "воскресенье";
-                break;
-            default:
-                dayOfWeek = "";
-                break;
-
-        }
         switch (Integer.valueOf(month.format(date))) {
             case 1:
                 monthOfYear = "января";
