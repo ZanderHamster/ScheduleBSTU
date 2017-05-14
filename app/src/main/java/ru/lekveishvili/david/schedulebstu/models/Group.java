@@ -1,15 +1,28 @@
 package ru.lekveishvili.david.schedulebstu.models;
 
 
-public class Group {
-    final int id;
-    final String name;
+import io.realm.RealmObject;
+
+public class Group extends RealmObject {
+    String id;
+    String name;
+
+    public Group() {
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -23,7 +36,7 @@ public class Group {
     }
 
     public static final class Builder {
-        private int id;
+        private String id;
         private String name;
 
         private Builder() {
@@ -34,7 +47,7 @@ public class Group {
             return this;
         }
 
-        public Builder withId(int id) {
+        public Builder withId(String id) {
             this.id = id;
             return this;
         }

@@ -1,11 +1,16 @@
 package ru.lekveishvili.david.schedulebstu.models;
 
 
-public class Teacher {
-    final int id;
-    final String firstName;
-    final String secondName;
-    final String thirdName;
+import io.realm.RealmObject;
+
+public class Teacher extends RealmObject {
+    int id;
+    String firstName;
+    String secondName;
+    String thirdName;
+
+    public Teacher() {
+    }
 
     public static Builder newBuilder() {
         return new Builder();

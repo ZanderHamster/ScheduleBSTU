@@ -13,6 +13,7 @@ import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +24,16 @@ import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
+import ru.lekveishvili.david.schedulebstu.models.Group;
+import ru.lekveishvili.david.schedulebstu.models.Room;
+import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
+import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetGroupUseCase;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetRoomUseCase;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
 
@@ -41,6 +50,11 @@ public class ParentController extends BaseController {
     @Inject
     BottomNavigationService bottomNavigationService;
 
+
+    GetRoomUseCase getRoomUseCase;
+    GetGroupUseCase getGroupUseCase;
+
+    private Realm realm;
     private Tag tag;
     private Router bottomNavigationRouter;
     private Disposable bottomNavigationSubscription;
@@ -66,6 +80,7 @@ public class ParentController extends BaseController {
     @Override
     protected void onViewBound(@NonNull View view) {
         super.onViewBound(view);
+        realm = Realm.getDefaultInstance();
         Activity activity = getActivity();
         if (activity == null) return;
         ScheduleBSTUApplication.getAppComponent(activity)
@@ -75,7 +90,108 @@ public class ParentController extends BaseController {
         setRouterRootIfNeeded();
         configureBottomNavMenu();
         subscribeToBottomNavigationState();
+        fetchData();
     }
+
+    private void fetchData() {
+        MainApiService apiService = RetrofitClient.getMainApiService();
+        getGroupUseCase = new GetGroupUseCase(apiService);
+        getGroupUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::setGroups
+                );
+        getRoomUseCase = new GetRoomUseCase(apiService);
+        getRoomUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::setRooms
+                );
+    }
+
+    ///----------------///
+    private void setRooms(List<Room> rooms) {
+        realm.beginTransaction();
+        RealmResults<Room> requestRoom = realm.where(Room.class).findAll();
+        List<Room> tmpRoomList = new ArrayList<>();
+        for (int i = 0; i < requestRoom.size(); i++) {
+            tmpRoomList.add(requestRoom.get(i));
+        }
+        for (int i = 0; i < rooms.size(); i++) {
+            if (containsRoom(tmpRoomList, rooms.get(i))) {
+                tmpRoomList = removeItemFromListRoom(tmpRoomList, rooms.get(i));
+            } else {
+                realm.copyToRealm(rooms.get(i));
+            }
+        }
+        for (int i = 0; i < tmpRoomList.size(); i++) {
+            tmpRoomList.get(i).deleteFromRealm();
+        }
+        realm.commitTransaction();
+    }
+
+    private boolean containsRoom(List<Room> list, Room item) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(item.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Room> removeItemFromListRoom(List<Room> list, Room item) {
+        List<Room> tmpList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).getId().equals(item.getId())) {
+                tmpList.add(list.get(i));
+            }
+        }
+        return tmpList;
+    }
+
+    ///----------------///
+    private void setGroups(List<Group> groups) {
+        realm.beginTransaction();
+        RealmResults<Group> requestGroup = realm.where(Group.class).findAll();
+        List<Group> tmpGroupList = new ArrayList<>();
+        for (int i = 0; i < requestGroup.size(); i++) {
+            tmpGroupList.add(requestGroup.get(i));
+        }
+        for (int i = 0; i < groups.size(); i++) {
+            if (containsGroup(tmpGroupList, groups.get(i))) {
+                tmpGroupList = removeItemFromListGroup(tmpGroupList, groups.get(i));
+            } else {
+                realm.copyToRealm(groups.get(i));
+            }
+        }
+        for (int i = 0; i < tmpGroupList.size(); i++) {
+            tmpGroupList.get(i).deleteFromRealm();
+        }
+        realm.commitTransaction();
+    }
+
+    private boolean containsGroup(List<Group> list, Group item) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(item.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Group> removeItemFromListGroup(List<Group> list, Group item) {
+        List<Group> tmpList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).getId().equals(item.getId())) {
+                tmpList.add(list.get(i));
+            }
+        }
+        return tmpList;
+    }
+
+    ///----------------///
 
     private void subscribeToBottomNavigationState() {
         bottomNavigationSubscription = bottomNavigationService.getBottomNavigationVisibilityObservable()
@@ -192,6 +308,7 @@ public class ParentController extends BaseController {
     @Override
     protected void onDestroyView(@NonNull final View view) {
         super.onDestroyView(view);
+        realm.close();
         if (bottomNavigationSubscription != null && !bottomNavigationSubscription.isDisposed()) {
             bottomNavigationSubscription.dispose();
         }

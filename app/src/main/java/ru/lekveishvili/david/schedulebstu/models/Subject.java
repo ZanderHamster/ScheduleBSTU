@@ -1,9 +1,14 @@
 package ru.lekveishvili.david.schedulebstu.models;
 
 
-public class Subject {
-    final int id;
-    final String name;
+import io.realm.RealmObject;
+
+public class Subject extends RealmObject {
+    int id;
+    String name;
+
+    public Subject() {
+    }
 
     public static Builder newBuilder() {
         return new Builder();

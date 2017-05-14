@@ -1,9 +1,14 @@
 package ru.lekveishvili.david.schedulebstu.models;
 
 
-public class EventType {
-    final int id;
-    final String name;
+import io.realm.RealmObject;
+
+public class EventType extends RealmObject {
+    int id;
+    String name;
+
+    public EventType() {
+    }
 
     public static Builder newBuilder() {
         return new Builder();

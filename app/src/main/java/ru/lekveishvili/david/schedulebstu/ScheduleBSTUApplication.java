@@ -3,6 +3,8 @@ package ru.lekveishvili.david.schedulebstu;
 import android.app.Application;
 import android.content.Context;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import ru.lekveishvili.david.schedulebstu.di.ComponentFactory;
 import ru.lekveishvili.david.schedulebstu.di.components.AppComponent;
 
@@ -20,6 +22,10 @@ public class ScheduleBSTUApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .build();
+        Realm.setDefaultConfiguration(config);
         setupAppComponent();
     }
 

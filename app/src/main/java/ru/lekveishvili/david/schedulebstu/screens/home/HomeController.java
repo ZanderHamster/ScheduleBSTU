@@ -3,6 +3,7 @@ package ru.lekveishvili.david.schedulebstu.screens.home;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
+
 
 import butterknife.BindView;
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.models.Day;
 import ru.lekveishvili.david.schedulebstu.models.Event;
@@ -32,6 +35,7 @@ import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapt
 
 public class HomeController extends BaseController {
     private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
+    private Realm realm;
     @BindView(R.id.home_toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.home_recycler)
@@ -45,17 +49,46 @@ public class HomeController extends BaseController {
     @Override
     protected void onViewBound(@NonNull View view) {
         super.onViewBound(view);
+//        ScheduleBSTUApplication
+//                .getAppComponent(view.getContext())
+//                .plus(new HomeComponent.GroupControllerModule())
+//                .inject(this);
+        realm = Realm.getDefaultInstance();
         configureToolbar();
         configureRecycler();
         setModel();
     }
 
     private void setModel() {
+//        DeleteAllTable();
+        realm.beginTransaction();
+
+//        Event manageEvent = realm.copyToRealm(event);
+//        RealmResults<Event> requestGroup = realm.where(Event.class)
+//                .equalTo("group.name", manageGroup.getName())
+//                .findAll();
+        RealmResults<Group> requestEvent = realm.where(Group.class).findAll();
+//
+        if (!requestEvent.isEmpty()) {
+            int t = 3;
+            String s = String.valueOf(t);
+        } else {
+            int t = 5;
+            String s = String.valueOf(t);
+        }
+        realm.commitTransaction();
+
         specificationsSectionAdapter.removeAllSections();
         specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(createTestDay().getDate()), createTestDay().getEventList()));
         specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(createTestDay2().getDate()), createTestDay2().getEventList()));
         specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(createTestDay2().getDate()), createTestDay2().getEventList()));
         specificationsSectionAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 
     private String convertDateToString(Date date) {
@@ -115,7 +148,7 @@ public class HomeController extends BaseController {
         return Day.newBuilder()
                 .withName("среда, 10 мая")
                 .withDate(date)
-                .withEventItems(createTestEvents())
+                .withEventItems(createTestEvents(date))
                 .build();
     }
 
@@ -126,32 +159,56 @@ public class HomeController extends BaseController {
         return Day.newBuilder()
                 .withName("четверг, 11 мая")
                 .withDate(date)
-                .withEventItems(createTestEvents())
+                .withEventItems(createTestEvents(date))
                 .build();
     }
 
-    private List<Event> createTestEvents() {
+    private List<Event> createTestEvents(Date date) {
         List<Event> eventList = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, 2017);
-        cal.set(Calendar.MONTH, 5);
-        cal.set(Calendar.DATE, 9);
-        cal.set(Calendar.HOUR_OF_DAY, 22);
-        cal.set(Calendar.MINUTE, 10);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(date.getYear(), date.getMonth(), date.getDay(), 22, 10);
         Date date1 = cal.getTime();
 
-
         Calendar cal2 = Calendar.getInstance();
-        cal2.set(Calendar.YEAR, 2017);
-        cal2.set(Calendar.MONTH, 5);
-        cal2.set(Calendar.DATE, 9);
-        cal2.set(Calendar.HOUR_OF_DAY, 22);
-        cal2.set(Calendar.MINUTE, 30);
-        cal2.set(Calendar.SECOND, 0);
-        cal2.set(Calendar.MILLISECOND, 0);
+        cal2.set(date.getYear(), date.getMonth(), date.getDay(), 22, 30);
         Date date2 = cal2.getTime();
+
+        Calendar cal3 = Calendar.getInstance();
+        cal3.set(date.getYear(), date.getMonth(), date.getDay(), 23, 10);
+        Date date3 = cal3.getTime();
+
+
+        Calendar cal4 = Calendar.getInstance();
+        cal4.set(date.getYear(), date.getMonth(), date.getDay(), 23, 30);
+        Date date4 = cal2.getTime();
+
+        Event build = Event.newBuilder()
+                .withEventType(EventType.newBuilder()
+                        .withName("Лекция")
+                        .build())
+                .withGroup(Group.newBuilder()
+                        .withName("13-ИВТ1")
+                        .build())
+                .withRoom(Room.newBuilder()
+                        .withName("420B")
+                        .build())
+                .withSubject(Subject.newBuilder()
+                        .withName("Программирование")
+                        .build())
+                .withTeacher(Teacher.newBuilder()
+                        .withFirstName("Иванов")
+                        .withSecondName("Иван")
+                        .withThirdName("Иванович")
+                        .build())
+                .withStartEvent(date1)
+                .withEndEvent(date2)
+                .build();
+
+        eventList.add(Event.newBuilder(build)
+                .withStartEvent(date3)
+                .withEndEvent(date4)
+                .build()
+        );
 
         eventList.add(Event.newBuilder()
                 .withEventType(EventType.newBuilder()
@@ -175,54 +232,53 @@ public class HomeController extends BaseController {
                 .withEndEvent(date2)
                 .build()
         );
-        eventList.add(Event.newBuilder()
-                .withEventType(EventType.newBuilder()
-                        .withName("Семинар")
-                        .build())
-                .withGroup(Group.newBuilder()
-                        .withName("14-ИВТ1")
-                        .build())
-                .withRoom(Room.newBuilder()
-                        .withName("219")
-                        .build())
-                .withSubject(Subject.newBuilder()
-                        .withName("Физра")
-                        .build())
-                .withTeacher(Teacher.newBuilder()
-                        .withFirstName("Петров")
-                        .withSecondName("Петр")
-                        .withThirdName("Петрович")
-                        .build())
-                .withStartEvent(date1)
-                .withEndEvent(date2)
-                .build()
-        );
-        eventList.add(Event.newBuilder()
-                .withEventType(EventType.newBuilder()
-                        .withName("Семинар")
-                        .build())
-                .withGroup(Group.newBuilder()
-                        .withName("14-ИВТ1")
-                        .build())
-                .withRoom(Room.newBuilder()
-                        .withName("219")
-                        .build())
-                .withSubject(Subject.newBuilder()
-                        .withName("Физра")
-                        .build())
-                .withTeacher(Teacher.newBuilder()
-                        .withFirstName("Петров")
-                        .withSecondName("Петр")
-                        .withThirdName("Петрович")
-                        .build())
-                .withStartEvent(date1)
-                .withEndEvent(date2)
-                .build()
-        );
 
+        eventList.add(Event.newBuilder()
+                .withEventType(EventType.newBuilder()
+                        .withName("Семинар")
+                        .build())
+                .withGroup(Group.newBuilder()
+                        .withName("14-ИВТ1")
+                        .build())
+                .withRoom(Room.newBuilder()
+                        .withName("219")
+                        .build())
+                .withSubject(Subject.newBuilder()
+                        .withName("Физра")
+                        .build())
+                .withTeacher(Teacher.newBuilder()
+                        .withFirstName("Петров")
+                        .withSecondName("Петр")
+                        .withThirdName("Петрович")
+                        .build())
+                .withStartEvent(date1)
+                .withEndEvent(date2)
+                .build()
+        );
+        eventList.add(Event.newBuilder()
+                .withEventType(EventType.newBuilder()
+                        .withName("Семинар")
+                        .build())
+                .withGroup(Group.newBuilder()
+                        .withName("14-ИВТ1")
+                        .build())
+                .withRoom(Room.newBuilder()
+                        .withName("219")
+                        .build())
+                .withSubject(Subject.newBuilder()
+                        .withName("Физра")
+                        .build())
+                .withTeacher(Teacher.newBuilder()
+                        .withFirstName("Петров")
+                        .withSecondName("Петр")
+                        .withThirdName("Петрович")
+                        .build())
+                .withStartEvent(date1)
+                .withEndEvent(date2)
+                .build()
+        );
         return eventList;
     }
-
 
     private void configureRecycler() {
         homeRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));

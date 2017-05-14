@@ -2,17 +2,54 @@ package ru.lekveishvili.david.schedulebstu.models;
 
 import java.util.Date;
 
-public class Event {
-    final Date startEvent;
-    final Date endEvent;
-    final EventType eventType;
-    final Room room;
-    final Teacher teacher;
-    final Subject subject;
-    final Group group;
+import io.realm.RealmObject;
+
+public class Event extends RealmObject {
+    private Date startEvent;
+    private Date endEvent;
+    private EventType eventType;
+    private Room room;
+    private Teacher teacher;
+    private Subject subject;
+    private Group group;
+
+    public Event() {
+    }
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static Builder newBuilder(Event oldModel) {
+        return new Builder(oldModel);
+    }
+
+    public void setStartEvent(Date startEvent) {
+        this.startEvent = startEvent;
+    }
+
+    public void setEndEvent(Date endEvent) {
+        this.endEvent = endEvent;
+    }
+
+    public void setEventType(EventType eventType) {
+        this.eventType = eventType;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
     }
 
     public Date getStartEvent() {
@@ -63,6 +100,16 @@ public class Event {
         private Group group;
 
         private Builder() {
+        }
+
+        private Builder(final Event copy) {
+            this.startEvent = copy.startEvent;
+            this.endEvent = copy.endEvent;
+            this.eventType = copy.eventType;
+            this.room = copy.room;
+            this.teacher = copy.teacher;
+            this.subject = copy.subject;
+            this.group = copy.group;
         }
 
         public Builder withEventType(final EventType eventType) {

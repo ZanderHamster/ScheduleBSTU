@@ -1,15 +1,20 @@
 package ru.lekveishvili.david.schedulebstu.models;
 
 
-public class Room {
-    final int id;
-    final String name;
+import io.realm.RealmObject;
+
+public class Room extends RealmObject {
+    String id;
+    String name;
+
+    public Room() {
+    }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -23,7 +28,7 @@ public class Room {
     }
 
     public static final class Builder {
-        private int id;
+        private String id;
         private String name;
 
         private Builder() {
@@ -34,7 +39,7 @@ public class Room {
             return this;
         }
 
-        public Builder withId(int id) {
+        public Builder withId(String id) {
             this.id = id;
             return this;
         }
