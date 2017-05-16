@@ -4,7 +4,7 @@ package ru.lekveishvili.david.schedulebstu.models;
 import io.realm.RealmObject;
 
 public class Subject extends RealmObject {
-    int id;
+    String id;
     String name;
 
     public Subject() {
@@ -14,7 +14,7 @@ public class Subject extends RealmObject {
         return new Builder();
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -28,7 +28,7 @@ public class Subject extends RealmObject {
     }
 
     public static final class Builder {
-        private int id;
+        private String id;
         private String name;
 
         private Builder() {
@@ -39,7 +39,7 @@ public class Subject extends RealmObject {
             return this;
         }
 
-        public Builder withId(int id) {
+        public Builder withId(String id) {
             this.id = id;
             return this;
         }

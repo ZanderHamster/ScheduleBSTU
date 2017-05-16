@@ -7,12 +7,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import butterknife.BindView;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
+import ru.lekveishvili.david.schedulebstu.models.Group;
+import ru.lekveishvili.david.schedulebstu.models.Room;
+import ru.lekveishvili.david.schedulebstu.models.Teacher;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 
 public class SearchController extends BaseController {
     @BindView(R.id.search_toolbar_title)
     TextView toolbarTitle;
+    private Realm realm;
 
     @Override
     protected View inflateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
@@ -22,7 +28,23 @@ public class SearchController extends BaseController {
     @Override
     protected void onViewBound(@NonNull View view) {
         super.onViewBound(view);
+
+        realm = Realm.getDefaultInstance();
         configureToolbar();
+        configureList();
+    }
+
+    private void configureList() {
+        realm.beginTransaction();
+        RealmResults<Room> requestEvent = realm.where(Room.class).findAll();
+        if (!requestEvent.isEmpty()) {
+            int t = 3;
+            String s = String.valueOf(t);
+        } else {
+            int t = 5;
+            String s = String.valueOf(t);
+        }
+        realm.commitTransaction();
     }
 
     private void configureToolbar() {

@@ -4,7 +4,7 @@ package ru.lekveishvili.david.schedulebstu.models;
 import io.realm.RealmObject;
 
 public class Teacher extends RealmObject {
-    int id;
+    String id;
     String firstName;
     String secondName;
     String thirdName;
@@ -16,7 +16,7 @@ public class Teacher extends RealmObject {
         return new Builder();
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -40,7 +40,7 @@ public class Teacher extends RealmObject {
     }
 
     public static final class Builder {
-        private int id;
+        private String id;
         private String firstName;
         private String secondName;
         private String thirdName;
@@ -63,7 +63,7 @@ public class Teacher extends RealmObject {
             return this;
         }
 
-        public Builder withId(int id) {
+        public Builder withId(String id) {
             this.id = id;
             return this;
         }

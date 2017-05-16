@@ -28,12 +28,18 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
+import ru.lekveishvili.david.schedulebstu.models.EventType;
 import ru.lekveishvili.david.schedulebstu.models.Group;
 import ru.lekveishvili.david.schedulebstu.models.Room;
+import ru.lekveishvili.david.schedulebstu.models.Subject;
+import ru.lekveishvili.david.schedulebstu.models.Teacher;
 import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetEventTypeUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetGroupUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetRoomUseCase;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetSubjectUseCase;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetTeacherUseCase;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
 
@@ -53,6 +59,9 @@ public class ParentController extends BaseController {
 
     GetRoomUseCase getRoomUseCase;
     GetGroupUseCase getGroupUseCase;
+    GetSubjectUseCase getSubjectUseCase;
+    GetTeacherUseCase getTeacherUseCase;
+    GetEventTypeUseCase getEventTypeUseCase;
 
     private Realm realm;
     private Tag tag;
@@ -96,21 +105,152 @@ public class ParentController extends BaseController {
     private void fetchData() {
         MainApiService apiService = RetrofitClient.getMainApiService();
         getGroupUseCase = new GetGroupUseCase(apiService);
+        getRoomUseCase = new GetRoomUseCase(apiService);
+        getSubjectUseCase = new GetSubjectUseCase(apiService);
+        getTeacherUseCase = new GetTeacherUseCase(apiService);
+        getEventTypeUseCase = new GetEventTypeUseCase(apiService);
         getGroupUseCase.execute()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::setGroups
                 );
-        getRoomUseCase = new GetRoomUseCase(apiService);
         getRoomUseCase.execute()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::setRooms
                 );
+        getSubjectUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::setSubjects
+                );
+        getTeacherUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::setTeachers
+                );
+        getEventTypeUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::setEventTypes
+                );
     }
-
+    ///----------------///
+    private void setEventTypes(List<EventType> eventTypes) {
+        realm.beginTransaction();
+        RealmResults<EventType> requestEventTypes = realm.where(EventType.class).findAll();
+        List<EventType> tmpEventTypeList = new ArrayList<>();
+        for (int i = 0; i < requestEventTypes.size(); i++) {
+            tmpEventTypeList.add(requestEventTypes.get(i));
+        }
+        for (int i = 0; i < eventTypes.size(); i++) {
+            if (containsEventType(tmpEventTypeList, eventTypes.get(i))) {
+                tmpEventTypeList = removeItemFromListEventType(tmpEventTypeList, eventTypes.get(i));
+            } else {
+                realm.copyToRealm(eventTypes.get(i));
+            }
+        }
+        for (int i = 0; i < tmpEventTypeList.size(); i++) {
+            tmpEventTypeList.get(i).deleteFromRealm();
+        }
+        realm.commitTransaction();
+    }
+    private boolean containsEventType(List<EventType> list, EventType item) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(item.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private List<EventType> removeItemFromListEventType(List<EventType> list, EventType item) {
+        List<EventType> tmpList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).getId().equals(item.getId())) {
+                tmpList.add(list.get(i));
+            }
+        }
+        return tmpList;
+    }
+    ///----------------///
+    private void setTeachers(List<Teacher> teachers) {
+        realm.beginTransaction();
+        RealmResults<Teacher> requestTeacher = realm.where(Teacher.class).findAll();
+        List<Teacher> tmpTeacherList = new ArrayList<>();
+        for (int i = 0; i < requestTeacher.size(); i++) {
+            tmpTeacherList.add(requestTeacher.get(i));
+        }
+        for (int i = 0; i < teachers.size(); i++) {
+            if (containsTeacher(tmpTeacherList, teachers.get(i))) {
+                tmpTeacherList = removeItemFromListTeacher(tmpTeacherList, teachers.get(i));
+            } else {
+                realm.copyToRealm(teachers.get(i));
+            }
+        }
+        for (int i = 0; i < tmpTeacherList.size(); i++) {
+            tmpTeacherList.get(i).deleteFromRealm();
+        }
+        realm.commitTransaction();
+    }
+    private boolean containsTeacher(List<Teacher> list, Teacher item) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(item.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private List<Teacher> removeItemFromListTeacher(List<Teacher> list, Teacher item) {
+        List<Teacher> tmpList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).getId().equals(item.getId())) {
+                tmpList.add(list.get(i));
+            }
+        }
+        return tmpList;
+    }
+    ///----------------///
+    private void setSubjects(List<Subject> subjects) {
+        realm.beginTransaction();
+        RealmResults<Subject> requestSubject = realm.where(Subject.class).findAll();
+        List<Subject> tmpSubjectList = new ArrayList<>();
+        for (int i = 0; i < requestSubject.size(); i++) {
+            tmpSubjectList.add(requestSubject.get(i));
+        }
+        for (int i = 0; i < subjects.size(); i++) {
+            if (containsSubject(tmpSubjectList, subjects.get(i))) {
+                tmpSubjectList = removeItemFromListSubject(tmpSubjectList, subjects.get(i));
+            } else {
+                realm.copyToRealm(subjects.get(i));
+            }
+        }
+        for (int i = 0; i < tmpSubjectList.size(); i++) {
+            tmpSubjectList.get(i).deleteFromRealm();
+        }
+        realm.commitTransaction();
+    }
+    private boolean containsSubject(List<Subject> list, Subject item) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(item.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private List<Subject> removeItemFromListSubject(List<Subject> list, Subject item) {
+        List<Subject> tmpList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).getId().equals(item.getId())) {
+                tmpList.add(list.get(i));
+            }
+        }
+        return tmpList;
+    }
     ///----------------///
     private void setRooms(List<Room> rooms) {
         realm.beginTransaction();
@@ -131,7 +271,6 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
-
     private boolean containsRoom(List<Room> list, Room item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -140,7 +279,6 @@ public class ParentController extends BaseController {
         }
         return false;
     }
-
     private List<Room> removeItemFromListRoom(List<Room> list, Room item) {
         List<Room> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -150,7 +288,6 @@ public class ParentController extends BaseController {
         }
         return tmpList;
     }
-
     ///----------------///
     private void setGroups(List<Group> groups) {
         realm.beginTransaction();
@@ -171,7 +308,6 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
-
     private boolean containsGroup(List<Group> list, Group item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -180,7 +316,6 @@ public class ParentController extends BaseController {
         }
         return false;
     }
-
     private List<Group> removeItemFromListGroup(List<Group> list, Group item) {
         List<Group> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -190,7 +325,6 @@ public class ParentController extends BaseController {
         }
         return tmpList;
     }
-
     ///----------------///
 
     private void subscribeToBottomNavigationState() {
