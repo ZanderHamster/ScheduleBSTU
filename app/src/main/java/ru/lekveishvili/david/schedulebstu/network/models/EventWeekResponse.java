@@ -17,6 +17,26 @@ public class EventWeekResponse {
         public List<Other> other = null;
     }
     public class Basic {
+
+        @SerializedName("date")
+        public Date date;
+        @SerializedName("classTime")
+        public ClassTime classTime;
+        @SerializedName("eventType")
+        public EventType eventType;
+        @SerializedName("groups")
+        public List<Group> groups = null;
+        @SerializedName("lectureHall")
+        public LectureHall lectureHall;
+        @SerializedName("lecturer")
+        public List<Lecturer> lecturer = null;
+        @SerializedName("subject")
+        public Subject subject;
+        @SerializedName("id")
+        public String id;
+
+    }
+    public class Basic {
         @SerializedName("13:20-14:55")
         public List<_13201455> _13201455 = null;
         @SerializedName("15:05-16:40")

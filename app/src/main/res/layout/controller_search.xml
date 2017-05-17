@@ -2,11 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/search_toolbar"
         style="@style/ToolbarStyle"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -25,6 +30,12 @@
                 android:textSize="20sp" />
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
-
+<EditText
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusableInTouchMode="true"
+    android:imeActionLabel="Done"
+    android:imeOptions="actionDone"
+    android:inputType="text" />
 
 </LinearLayout>
