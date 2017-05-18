@@ -28,6 +28,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
+import ru.lekveishvili.david.schedulebstu.models.Event;
 import ru.lekveishvili.david.schedulebstu.models.EventType;
 import ru.lekveishvili.david.schedulebstu.models.Group;
 import ru.lekveishvili.david.schedulebstu.models.Room;
@@ -36,6 +37,7 @@ import ru.lekveishvili.david.schedulebstu.models.Teacher;
 import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetEventTypeUseCase;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetEventWeekUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetGroupUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetRoomUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetSubjectUseCase;
@@ -62,6 +64,7 @@ public class ParentController extends BaseController {
     GetSubjectUseCase getSubjectUseCase;
     GetTeacherUseCase getTeacherUseCase;
     GetEventTypeUseCase getEventTypeUseCase;
+    GetEventWeekUseCase getEventWeekUseCase;
 
     private Realm realm;
     private Tag tag;
@@ -109,6 +112,7 @@ public class ParentController extends BaseController {
         getSubjectUseCase = new GetSubjectUseCase(apiService);
         getTeacherUseCase = new GetTeacherUseCase(apiService);
         getEventTypeUseCase = new GetEventTypeUseCase(apiService);
+        getEventWeekUseCase = new GetEventWeekUseCase(apiService);
         getGroupUseCase.execute()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -139,7 +143,18 @@ public class ParentController extends BaseController {
                 .subscribe(
                         this::setEventTypes
                 );
+        getEventWeekUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::setTest
+                );
     }
+
+    void setTest(List<Event> events) {
+        int r = 5;
+    }
+
     ///----------------///
     private void setEventTypes(List<EventType> eventTypes) {
         realm.beginTransaction();
@@ -160,6 +175,7 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
+
     private boolean containsEventType(List<EventType> list, EventType item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -168,6 +184,7 @@ public class ParentController extends BaseController {
         }
         return false;
     }
+
     private List<EventType> removeItemFromListEventType(List<EventType> list, EventType item) {
         List<EventType> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -177,6 +194,7 @@ public class ParentController extends BaseController {
         }
         return tmpList;
     }
+
     ///----------------///
     private void setTeachers(List<Teacher> teachers) {
         realm.beginTransaction();
@@ -197,6 +215,7 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
+
     private boolean containsTeacher(List<Teacher> list, Teacher item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -205,6 +224,7 @@ public class ParentController extends BaseController {
         }
         return false;
     }
+
     private List<Teacher> removeItemFromListTeacher(List<Teacher> list, Teacher item) {
         List<Teacher> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -214,6 +234,7 @@ public class ParentController extends BaseController {
         }
         return tmpList;
     }
+
     ///----------------///
     private void setSubjects(List<Subject> subjects) {
         realm.beginTransaction();
@@ -234,6 +255,7 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
+
     private boolean containsSubject(List<Subject> list, Subject item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -242,6 +264,7 @@ public class ParentController extends BaseController {
         }
         return false;
     }
+
     private List<Subject> removeItemFromListSubject(List<Subject> list, Subject item) {
         List<Subject> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -251,6 +274,7 @@ public class ParentController extends BaseController {
         }
         return tmpList;
     }
+
     ///----------------///
     private void setRooms(List<Room> rooms) {
         realm.beginTransaction();
@@ -271,6 +295,7 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
+
     private boolean containsRoom(List<Room> list, Room item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -279,6 +304,7 @@ public class ParentController extends BaseController {
         }
         return false;
     }
+
     private List<Room> removeItemFromListRoom(List<Room> list, Room item) {
         List<Room> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -288,6 +314,7 @@ public class ParentController extends BaseController {
         }
         return tmpList;
     }
+
     ///----------------///
     private void setGroups(List<Group> groups) {
         realm.beginTransaction();
@@ -308,6 +335,7 @@ public class ParentController extends BaseController {
         }
         realm.commitTransaction();
     }
+
     private boolean containsGroup(List<Group> list, Group item) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getId().equals(item.getId())) {
@@ -316,6 +344,7 @@ public class ParentController extends BaseController {
         }
         return false;
     }
+
     private List<Group> removeItemFromListGroup(List<Group> list, Group item) {
         List<Group> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {

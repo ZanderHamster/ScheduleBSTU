@@ -1,17 +1,20 @@
 package ru.lekveishvili.david.schedulebstu.models;
 
 import java.util.Date;
+import java.util.List;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 public class Event extends RealmObject {
+    private String id;
     private Date startEvent;
     private Date endEvent;
     private EventType eventType;
     private Room room;
-    private Teacher teacher;
+    private RealmList<Teacher> teachers;
     private Subject subject;
-    private Group group;
+    private RealmList<Group> groups;
 
     public Event() {
     }
@@ -22,6 +25,14 @@ public class Event extends RealmObject {
 
     public static Builder newBuilder(Event oldModel) {
         return new Builder(oldModel);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setStartEvent(Date startEvent) {
@@ -40,16 +51,16 @@ public class Event extends RealmObject {
         this.room = room;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+    public void setTeachers(RealmList<Teacher> teachers) {
+        this.teachers = teachers;
     }
 
     public void setSubject(Subject subject) {
         this.subject = subject;
     }
 
-    public void setGroup(Group group) {
-        this.group = group;
+    public void setGroups(RealmList<Group> group) {
+        this.groups = group;
     }
 
     public Date getStartEvent() {
@@ -68,48 +79,56 @@ public class Event extends RealmObject {
         return room;
     }
 
-    public Teacher getTeacher() {
-        return teacher;
+    public List<Teacher> getTeachers() {
+        return teachers;
     }
 
     public Subject getSubject() {
         return subject;
     }
 
-    public Group getGroup() {
-        return group;
+    public List<Group> getGroups() {
+        return groups;
     }
 
     public Event(final Builder builder) {
+        this.id = builder.id;
         this.startEvent = builder.startEvent;
         this.endEvent = builder.endEvent;
         this.eventType = builder.eventType;
         this.room = builder.room;
-        this.teacher = builder.teacher;
+        this.teachers = builder.teachers;
         this.subject = builder.subject;
-        this.group = builder.group;
+        this.groups = builder.groups;
     }
 
     public static final class Builder {
+        private String id;
         private Date startEvent;
         private Date endEvent;
         private EventType eventType;
         private Room room;
-        private Teacher teacher;
+        private RealmList<Teacher> teachers;
         private Subject subject;
-        private Group group;
+        private RealmList<Group> groups;
 
         private Builder() {
         }
 
         private Builder(final Event copy) {
+            this.id = copy.id;
             this.startEvent = copy.startEvent;
             this.endEvent = copy.endEvent;
             this.eventType = copy.eventType;
             this.room = copy.room;
-            this.teacher = copy.teacher;
+            this.teachers = copy.teachers;
             this.subject = copy.subject;
-            this.group = copy.group;
+            this.groups = copy.groups;
+        }
+
+        public Builder withId(final String id) {
+            this.id = id;
+            return this;
         }
 
         public Builder withEventType(final EventType eventType) {
@@ -132,8 +151,8 @@ public class Event extends RealmObject {
             return this;
         }
 
-        public Builder withTeacher(final Teacher teacher) {
-            this.teacher = teacher;
+        public Builder withTeachers(final RealmList<Teacher> teachers) {
+            this.teachers = teachers;
             return this;
         }
 
@@ -142,8 +161,8 @@ public class Event extends RealmObject {
             return this;
         }
 
-        public Builder withGroup(final Group group) {
-            this.group = group;
+        public Builder withGroups(final RealmList<Group> groups) {
+            this.groups = groups;
             return this;
         }
 

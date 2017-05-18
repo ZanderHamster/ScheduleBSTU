@@ -4,8 +4,8 @@ package ru.lekveishvili.david.schedulebstu.models;
 import io.realm.RealmObject;
 
 public class Group extends RealmObject {
-    String id;
-    String name;
+    private String id;
+    private String name;
 
     public Group() {
     }

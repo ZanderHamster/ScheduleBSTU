@@ -4,10 +4,10 @@ package ru.lekveishvili.david.schedulebstu.models;
 import io.realm.RealmObject;
 
 public class Teacher extends RealmObject {
-    String id;
-    String firstName;
-    String secondName;
-    String thirdName;
+    private String id;
+    private String firstName;
+    private String secondName;
+    private String thirdName;
 
     public Teacher() {
     }

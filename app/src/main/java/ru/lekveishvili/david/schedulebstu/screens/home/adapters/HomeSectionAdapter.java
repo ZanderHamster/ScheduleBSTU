@@ -55,11 +55,18 @@ public class HomeSectionAdapter extends StatelessSection {
 
         String eventType = event.getEventType().getName();
         String subject = event.getSubject().getName();
-        String teacher = event.getTeacher().getFirstName() + " " +
-                String.valueOf(event.getTeacher().getSecondName().charAt(0)) + ". " +
-                String.valueOf(event.getTeacher().getThirdName().charAt(0)) + ".";
+        String teacher = "";
+        for (int i = 0; i < event.getTeachers().size(); i++) {
+            teacher += event.getTeachers().get(i).getFirstName() + " " +
+                    String.valueOf(event.getTeachers().get(i).getSecondName().charAt(0)) + ". " +
+                    String.valueOf(event.getTeachers().get(i).getThirdName().charAt(0)) + ". ";
+        }
+        String group = "";
+        for (int i = 0; i < event.getGroups().size(); i++) {
+            group += event.getGroups().get(i).getName() + " ";
+        }
+
         String room = event.getRoom().getName();
-        String group = event.getGroup().getName();
         DateFormat df = new SimpleDateFormat("HH:mm", Locale.ROOT);
         String startEvent = df.format(event.getStartEvent());
         String endEvent = df.format(event.getEndEvent());
