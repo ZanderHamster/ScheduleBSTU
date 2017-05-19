@@ -61,6 +61,19 @@ public class HomeController extends BaseController {
     }
 
     private void setModel() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(2017, 4, 29, 0, 0, 0);
+        Date date = cal.getTime();
+        cal.add(Calendar.DATE, 7);
+        Date date2 = cal.getTime();
+        cal.add(Calendar.DATE, 7);
+        Date date3 = cal.getTime();
+        if (date.getTime() > date2.getTime()) {
+            int t = 3;
+        } else {
+            int t = 3;
+        }
+
 //        DeleteAllTable();
         realm.beginTransaction();
 
