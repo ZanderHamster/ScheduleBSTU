@@ -57,9 +57,19 @@ public class HomeSectionAdapter extends StatelessSection {
         String subject = event.getSubject().getName();
         String teacher = "";
         for (int i = 0; i < event.getTeachers().size(); i++) {
-            teacher += event.getTeachers().get(i).getFirstName() + " " +
-                    String.valueOf(event.getTeachers().get(i).getSecondName().charAt(0)) + ". " +
-                    String.valueOf(event.getTeachers().get(i).getThirdName().charAt(0)) + ". ";
+            String firstName = "";
+            String secondName = "";
+            String thirdName = "";
+            if (event.getTeachers().get(i).getFirstName() != null) {
+                firstName = event.getTeachers().get(i).getFirstName() + " ";
+            }
+            if (event.getTeachers().get(i).getSecondName() != null) {
+                secondName = String.valueOf(event.getTeachers().get(i).getSecondName().charAt(0)) + ". ";
+            }
+            if (event.getTeachers().get(i).getThirdName() != null) {
+                thirdName = String.valueOf(event.getTeachers().get(i).getThirdName().charAt(0)) + ". ";
+            }
+            teacher += firstName + secondName + thirdName;
         }
         String group = "";
         for (int i = 0; i < event.getGroups().size(); i++) {
@@ -67,7 +77,7 @@ public class HomeSectionAdapter extends StatelessSection {
         }
 
         String room = event.getRoom().getName();
-        DateFormat df = new SimpleDateFormat("HH:mm", Locale.ROOT);
+        DateFormat df = new SimpleDateFormat("HH:mm", new Locale("ru", "RU"));
         String startEvent = df.format(event.getStartEvent());
         String endEvent = df.format(event.getEndEvent());
 

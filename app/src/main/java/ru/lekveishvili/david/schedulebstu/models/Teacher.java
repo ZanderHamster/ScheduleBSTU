@@ -8,6 +8,7 @@ public class Teacher extends RealmObject {
     private String firstName;
     private String secondName;
     private String thirdName;
+    private String fullName;
 
     public Teacher() {
     }
@@ -32,11 +33,16 @@ public class Teacher extends RealmObject {
         return thirdName;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
     public Teacher(final Builder builder) {
         this.id = builder.id;
         this.firstName = builder.firstName;
         this.secondName = builder.secondName;
         this.thirdName = builder.thirdName;
+        this.fullName = builder.fullName;
     }
 
     public static final class Builder {
@@ -44,6 +50,7 @@ public class Teacher extends RealmObject {
         private String firstName;
         private String secondName;
         private String thirdName;
+        private String fullName;
 
         private Builder() {
         }
@@ -60,6 +67,11 @@ public class Teacher extends RealmObject {
 
         public Builder withThirdName(String thirdName) {
             this.thirdName = thirdName;
+            return this;
+        }
+
+        public Builder withFullName(String fullName) {
+            this.fullName = fullName;
             return this;
         }
 

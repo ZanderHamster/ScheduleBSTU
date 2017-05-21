@@ -1,6 +1,7 @@
 package ru.lekveishvili.david.schedulebstu.screens.home;
 
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -37,10 +38,13 @@ import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapt
 public class HomeController extends BaseController {
     private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
     private Realm realm;
+    private List<List<Event>> weeks = new ArrayList<>();
     @BindView(R.id.home_toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.home_recycler)
     RecyclerView homeRecycler;
+    @BindView(R.id.view_pager)
+    ViewPager viewPager;
 
     @Override
     protected View inflateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
@@ -50,10 +54,6 @@ public class HomeController extends BaseController {
     @Override
     protected void onViewBound(@NonNull View view) {
         super.onViewBound(view);
-//        ScheduleBSTUApplication
-//                .getAppComponent(view.getContext())
-//                .plus(new HomeComponent.GroupControllerModule())
-//                .inject(this);
         realm = Realm.getDefaultInstance();
         configureToolbar();
         configureRecycler();
@@ -61,48 +61,54 @@ public class HomeController extends BaseController {
     }
 
     private void setModel() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(2017, 4, 29, 0, 0, 0);
-        Date date = cal.getTime();
-        cal.add(Calendar.DATE, 7);
-        Date date2 = cal.getTime();
-        cal.add(Calendar.DATE, 7);
-        Date date3 = cal.getTime();
-        if (date.getTime() > date2.getTime()) {
-            int t = 3;
-        } else {
-            int t = 3;
+        Date startPeriod = realm.where(Event.class).minimumDate("startEvent");
+        Date endPeriod = realm.where(Event.class).maximumDate("endEvent");
+        Calendar startWeek = Calendar.getInstance();
+        Calendar endWeek = Calendar.getInstance();
+        startWeek.setTime(startPeriod);
+        startWeek.set(Calendar.HOUR_OF_DAY, 1);
+        endWeek.setTime(startPeriod);
+
+        while (endWeek.getTime().getTime() < endPeriod.getTime()) {
+            while (endWeek.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                endWeek.add(Calendar.DATE, 1);
+            }
+            startWeek.set(Calendar.HOUR_OF_DAY, 1);
+            Date dateStartWeek = startWeek.getTime();
+            Date dateEndWeek = endWeek.getTime();
+            RealmResults<Event> groups = realm.where(Event.class)
+                    .equalTo("groups.name", "13-ИВТ1")
+                    .between("startEvent", dateStartWeek, dateEndWeek)
+                    .findAllSorted("startEvent");
+            List<Event> eventList = realm.copyFromRealm(groups);
+            weeks.add(eventList);
+            endWeek.add(Calendar.DATE, 1);
+            Date time = endWeek.getTime();
+            startWeek.setTime(time);
         }
 
-//        DeleteAllTable();
-        realm.beginTransaction();
-
-//        Event manageEvent = realm.copyToRealm(event);
-//        RealmResults<Event> requestGroup = realm.where(Event.class)
-//                .equalTo("group.name", manageGroup.getName())
-//                .findAll();
-        RealmResults<Group> requestEvent = realm.where(Group.class).findAll();
-//
-        if (!requestEvent.isEmpty()) {
-            int t = 3;
-            String s = String.valueOf(t);
-        } else {
-            int t = 5;
-            String s = String.valueOf(t);
-        }
-        realm.commitTransaction();
-
-        specificationsSectionAdapter.removeAllSections();
-//        specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(createTestDay().getDate()), createTestDay().getEventList()));
-//        specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(createTestDay2().getDate()), createTestDay2().getEventList()));
-//        specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(createTestDay2().getDate()), createTestDay2().getEventList()));
-        specificationsSectionAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        realm.close();
+        Pager pager = new Pager(weeks);
+        viewPager.setAdapter(pager);
+//        specificationsSectionAdapter.removeAllSections();
+//        for (int i = 0; i < 5; i++) {
+//            RealmResults<Event> requestEvent2 = realm.where(Event.class).between("startEvent", startDay, endDay).findAll();
+//            List<Event> tmpList = new ArrayList<>();
+//            for (int j = 0; j < requestEvent2.size(); j++) {
+//                Event event = realm.copyFromRealm(requestEvent2.get(j));
+//                tmpList.add(event);
+//            }
+//            Collections.reverse(tmpList);
+//            specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(startDay), tmpList));
+//            Calendar tmpCal = Calendar.getInstance();
+//            tmpCal.setTime(startDay);
+//            tmpCal.add(Calendar.DATE, 1);
+//            startDay = tmpCal.getTime();
+//            tmpCal.set(Calendar.HOUR_OF_DAY, 24);
+//            tmpCal.set(Calendar.MINUTE, 59);
+//            tmpCal.set(Calendar.SECOND, 59);
+//            endDay = tmpCal.getTime();
+//        }
+//        specificationsSectionAdapter.notifyDataSetChanged();
     }
 
     private String convertDateToString(Date date) {
@@ -153,146 +159,6 @@ public class HomeController extends BaseController {
         }
         return dayOfWeek + ", " + dateMonth.format(date) + " " + monthOfYear;
     }
-
-//    private Day createTestDay() {
-//        Calendar cal = Calendar.getInstance();
-//        cal.set(2017, 4, 9, 10, 0, 0);
-//        Date date = cal.getTime();
-//
-//        return Day.newBuilder()
-//                .withName("среда, 10 мая")
-//                .withDate(date)
-//                .withEventItems(createTestEvents(date))
-//                .build();
-//    }
-//
-//    private Day createTestDay2() {
-//        Calendar cal = Calendar.getInstance();
-//        cal.set(2017, 4, 10, 10, 0, 0);
-//        Date date = cal.getTime();
-//        return Day.newBuilder()
-//                .withName("четверг, 11 мая")
-//                .withDate(date)
-//                .withEventItems(createTestEvents(date))
-//                .build();
-//    }
-//
-//    private List<Event> createTestEvents(Date date) {
-//        List<Event> eventList = new ArrayList<>();
-//        Calendar cal = Calendar.getInstance();
-//        cal.set(date.getYear(), date.getMonth(), date.getDay(), 22, 10);
-//        Date date1 = cal.getTime();
-//
-//        Calendar cal2 = Calendar.getInstance();
-//        cal2.set(date.getYear(), date.getMonth(), date.getDay(), 22, 30);
-//        Date date2 = cal2.getTime();
-//
-//        Calendar cal3 = Calendar.getInstance();
-//        cal3.set(date.getYear(), date.getMonth(), date.getDay(), 23, 10);
-//        Date date3 = cal3.getTime();
-//
-//
-//        Calendar cal4 = Calendar.getInstance();
-//        cal4.set(date.getYear(), date.getMonth(), date.getDay(), 23, 30);
-//        Date date4 = cal2.getTime();
-//
-//        Event build = Event.newBuilder()
-//                .withEventType(EventType.newBuilder()
-//                        .withName("Лекция")
-//                        .build())
-//                .withGroups(Collections.singletonList(Group.newBuilder()
-//                        .withName("13-ИВТ1")
-//                        .build()))
-//                .withRoom(Room.newBuilder()
-//                        .withName("420B")
-//                        .build())
-//                .withSubject(Subject.newBuilder()
-//                        .withName("Программирование")
-//                        .build())
-//                .withTeachers(Collections.singletonList(Teacher.newBuilder()
-//                        .withFirstName("Иванов")
-//                        .withSecondName("Иван")
-//                        .withThirdName("Иванович")
-//                        .build()))
-//                .withStartEvent(date1)
-//                .withEndEvent(date2)
-//                .build();
-//
-//        eventList.add(Event.newBuilder(build)
-//                .withStartEvent(date3)
-//                .withEndEvent(date4)
-//                .build()
-//        );
-//
-//        eventList.add(Event.newBuilder()
-//                .withEventType(EventType.newBuilder()
-//                        .withName("Лекция")
-//                        .build())
-//                .withGroups(Collections.singletonList(Group.newBuilder()
-//                        .withName("13-ИВТ1")
-//                        .build()))
-//                .withRoom(Room.newBuilder()
-//                        .withName("420B")
-//                        .build())
-//                .withSubject(Subject.newBuilder()
-//                        .withName("Программирование")
-//                        .build())
-//                .withTeachers(Collections.singletonList(Teacher.newBuilder()
-//                        .withFirstName("Иванов")
-//                        .withSecondName("Иван")
-//                        .withThirdName("Иванович")
-//                        .build()))
-//                .withStartEvent(date1)
-//                .withEndEvent(date2)
-//                .build()
-//        );
-//
-//        eventList.add(Event.newBuilder()
-//                .withEventType(EventType.newBuilder()
-//                        .withName("Семинар")
-//                        .build())
-//                .withGroups(Collections.singletonList(Group.newBuilder()
-//                        .withName("14-ИВТ1")
-//                        .build()))
-//                .withRoom(Room.newBuilder()
-//                        .withName("219")
-//                        .build())
-//                .withSubject(Subject.newBuilder()
-//                        .withName("Физра")
-//                        .build())
-//                .withTeachers(Collections.singletonList(Teacher.newBuilder()
-//                        .withFirstName("Петров")
-//                        .withSecondName("Петр")
-//                        .withThirdName("Петрович")
-//                        .build()))
-//                .withStartEvent(date1)
-//                .withEndEvent(date2)
-//                .build()
-//        );
-//        eventList.add(Event.newBuilder()
-//                .withEventType(EventType.newBuilder()
-//                        .withName("Семинар")
-//                        .build())
-//                .withGroups(Collections.singletonList(Group.newBuilder()
-//                        .withName("14-ИВТ1")
-//                        .build()))
-//                .withRoom(Room.newBuilder()
-//                        .withName("219")
-//                        .build())
-//                .withSubject(Subject.newBuilder()
-//                        .withName("Физра")
-//                        .build())
-//                .withTeachers(Collections.singletonList(Teacher.newBuilder()
-//                        .withFirstName("Петров")
-//                        .withSecondName("Петр")
-//                        .withThirdName("Петрович")
-//                        .build()))
-//                .withStartEvent(date1)
-//                .withEndEvent(date2)
-//                .build()
-//        );
-//        return eventList;
-//    }
 
     private void configureRecycler() {
         homeRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));

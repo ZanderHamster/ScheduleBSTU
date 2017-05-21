@@ -25,6 +25,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
@@ -44,6 +45,7 @@ import ru.lekveishvili.david.schedulebstu.network.usecase.GetSubjectUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetTeacherUseCase;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
+import ru.lekveishvili.david.schedulebstu.util.Utils;
 
 /**
  * Главный контроллер, контролирующий экраны по нажатиям на нижнюю плашку
@@ -105,55 +107,68 @@ public class ParentController extends BaseController {
         fetchData();
     }
 
+
     private void fetchData() {
-        MainApiService apiService = RetrofitClient.getMainApiService();
-        getGroupUseCase = new GetGroupUseCase(apiService);
-        getRoomUseCase = new GetRoomUseCase(apiService);
-        getSubjectUseCase = new GetSubjectUseCase(apiService);
-        getTeacherUseCase = new GetTeacherUseCase(apiService);
-        getEventTypeUseCase = new GetEventTypeUseCase(apiService);
-        getEventWeekUseCase = new GetEventWeekUseCase(apiService);
-        getGroupUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::setGroups
-                );
-        getRoomUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::setRooms
-                );
-        getSubjectUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::setSubjects
-                );
-        getTeacherUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::setTeachers
-                );
-        getEventTypeUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::setEventTypes
-                );
-        getEventWeekUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::setTest
-                );
+        if (Utils.isOnline(getApplicationContext())) {
+            MainApiService apiService = RetrofitClient.getMainApiService();
+            getGroupUseCase = new GetGroupUseCase(apiService);
+            getRoomUseCase = new GetRoomUseCase(apiService);
+            getSubjectUseCase = new GetSubjectUseCase(apiService);
+            getTeacherUseCase = new GetTeacherUseCase(apiService);
+            getEventTypeUseCase = new GetEventTypeUseCase(apiService);
+            getEventWeekUseCase = new GetEventWeekUseCase(apiService);
+            getGroupUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setGroups
+                    );
+            getRoomUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setRooms
+                    );
+            getSubjectUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setSubjects
+                    );
+            getTeacherUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setTeachers
+                    );
+            getEventTypeUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setEventTypes
+                    );
+            getEventWeekUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setEventsWeek
+                    );
+        }
+
     }
 
-    void setTest(List<Event> events) {
-        int r = 5;
+    ///----------------///
+    private void setEventsWeek(RealmList<Event> eventsWeek) {
+        realm.beginTransaction();
+        RealmResults<Event> all = realm.where(Event.class).findAll();
+        all.deleteAllFromRealm();
+        for (int i = 0; i < eventsWeek.size(); i++) {
+            realm.copyToRealm(eventsWeek.get(i));
+        }
+        realm.commitTransaction();
+        realm.close();
     }
+
 
     ///----------------///
     private void setEventTypes(List<EventType> eventTypes) {
@@ -188,7 +203,7 @@ public class ParentController extends BaseController {
     private List<EventType> removeItemFromListEventType(List<EventType> list, EventType item) {
         List<EventType> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            if (!list.get(i).getId().equals(item.getId())) {
+            if (!list.get(i).getName().equals(item.getName())) {
                 tmpList.add(list.get(i));
             }
         }
@@ -228,7 +243,7 @@ public class ParentController extends BaseController {
     private List<Teacher> removeItemFromListTeacher(List<Teacher> list, Teacher item) {
         List<Teacher> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            if (!list.get(i).getId().equals(item.getId())) {
+            if (!list.get(i).getFullName().equals(item.getFullName())) {
                 tmpList.add(list.get(i));
             }
         }
@@ -258,7 +273,7 @@ public class ParentController extends BaseController {
 
     private boolean containsSubject(List<Subject> list, Subject item) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getId().equals(item.getId())) {
+            if (list.get(i).getName().equals(item.getName())) {
                 return true;
             }
         }
@@ -268,7 +283,7 @@ public class ParentController extends BaseController {
     private List<Subject> removeItemFromListSubject(List<Subject> list, Subject item) {
         List<Subject> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            if (!list.get(i).getId().equals(item.getId())) {
+            if (!list.get(i).getName().equals(item.getName())) {
                 tmpList.add(list.get(i));
             }
         }
@@ -308,7 +323,7 @@ public class ParentController extends BaseController {
     private List<Room> removeItemFromListRoom(List<Room> list, Room item) {
         List<Room> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            if (!list.get(i).getId().equals(item.getId())) {
+            if (!list.get(i).getName().equals(item.getName())) {
                 tmpList.add(list.get(i));
             }
         }
@@ -348,7 +363,7 @@ public class ParentController extends BaseController {
     private List<Group> removeItemFromListGroup(List<Group> list, Group item) {
         List<Group> tmpList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            if (!list.get(i).getId().equals(item.getId())) {
+            if (!list.get(i).getName().equals(item.getName())) {
                 tmpList.add(list.get(i));
             }
         }

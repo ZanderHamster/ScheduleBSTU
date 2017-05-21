@@ -27,7 +27,7 @@ public class CoreActivity extends BaseActivity {
         ButterKnife.bind(this);
         coreRouter = Conductor.attachRouter(this, changeHandlerFrameLayout, savedInstanceState);
         if (!coreRouter.hasRootController()) {
-            coreRouter.setRoot(RouterTransaction.with(new ParentController(ParentController.Tag.HOME)));
+            coreRouter.setRoot(RouterTransaction.with(new ParentController(ParentController.Tag.ACCOUNT)));
         }
     }
 

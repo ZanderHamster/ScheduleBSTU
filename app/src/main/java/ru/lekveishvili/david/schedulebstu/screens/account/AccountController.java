@@ -13,6 +13,7 @@ import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 public class AccountController extends BaseController {
     @BindView(R.id.account_toolbar_title)
     TextView toolbarTitle;
+
     @Override
     protected View inflateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
         return inflater.inflate(R.layout.controller_account, container, false);

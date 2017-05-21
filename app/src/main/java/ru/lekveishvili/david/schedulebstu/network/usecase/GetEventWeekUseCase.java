@@ -3,6 +3,7 @@ package ru.lekveishvili.david.schedulebstu.network.usecase;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.realm.RealmList;
 import ru.lekveishvili.david.schedulebstu.models.Event;
 import ru.lekveishvili.david.schedulebstu.models.EventType;
 import ru.lekveishvili.david.schedulebstu.network.mappers.EventTypeModelMapper;
@@ -16,7 +17,7 @@ public class GetEventWeekUseCase {
         this.mainApiService = mainApiService;
     }
 
-    public Observable<List<Event>> execute() {
+    public Observable<RealmList<Event>> execute() {
         EventWeekModelMapper mapper = new EventWeekModelMapper(mainApiService);
 //        return mainApiService.getEventsWeekGroup("2017-09-11","13-%D0%98%D0%92%D0%A21")
         return mainApiService.getEventsWeekGroup()

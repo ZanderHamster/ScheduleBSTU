@@ -28,6 +28,7 @@ public class TeacherModelMapper {
                     .withSecondName(parts[1])
                     .withThirdName(parts[2])
                     .withId(teacher.id)
+                    .withFullName(fullName)
                     .build());
         }
         return result;

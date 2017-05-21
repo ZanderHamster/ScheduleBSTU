@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import io.realm.RealmList;
 import ru.lekveishvili.david.schedulebstu.models.Event;
@@ -25,8 +26,8 @@ public class EventWeekModelMapper {
         this.mainApiService = mainApiService;
     }
 
-    public List<Event> transform(EventWeekResponse eventWeekResponse) {
-        List<Event> result = new ArrayList<>();
+    public RealmList<Event> transform(EventWeekResponse eventWeekResponse) {
+        RealmList<Event> result = new RealmList<>();
         for (int i = 0; i < eventWeekResponse.timetable.size(); i++) {
             // Other
             for (int j = 0; j < eventWeekResponse.timetable.get(i).other.size(); j++) {
@@ -73,6 +74,7 @@ public class EventWeekModelMapper {
                             .withSecondName(parts[1])
                             .withThirdName(parts[2])
                             .withId(other.lecturer.get(k).id)
+                            .withFullName(other.lecturer.get(k).name)
                             .build());
                 }
                 // Предмет
@@ -97,13 +99,10 @@ public class EventWeekModelMapper {
                 boolean nextWeek = false;
                 EventWeekResponse.Basic basic = eventWeekResponse.timetable.get(i).basic.get(j);
                 //Дата события события
-                Integer dayOfTheWeek = basic.date.day;
+                Integer dayOfTheWeek = basic.date.day + 1;
                 String strStartPeriod = basic.date.academicPeriod.date.start; // 2017-09-01
                 String strEndPeriod = basic.date.academicPeriod.date.end; // 2017-12-29
-
-
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
-
 
                 Date dateStartPeriod = new Date();
                 Date dateEndPeriod = new Date();
@@ -116,14 +115,21 @@ public class EventWeekModelMapper {
                 // Нахожу первую дату в семестре для текущей пары
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(dateStartPeriod);
-                int tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK);
+                int tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
+                if (tmpDayOfTheWeek == 0) {
+                    tmpDayOfTheWeek = 7;
+                }
                 while (!(dayOfTheWeek == tmpDayOfTheWeek)) {
                     cal.add(Calendar.DATE, 1);
-                    if ((cal.get(Calendar.DAY_OF_WEEK)) == 6) {
+                    if (tmpDayOfTheWeek == 7) {
                         nextWeek = true;
                     }
+                    tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
+                    if (tmpDayOfTheWeek == 0) {
+                        tmpDayOfTheWeek = 7;
+                    }
                 }
-                if ((basic.date.drop == 1) && nextWeek) {
+                if ((basic.date.drop == 1) && nextWeek || (basic.date.drop == 2) && !nextWeek) {
                     cal.add(Calendar.DATE, 0);
                 }
                 if ((basic.date.drop == 2) && nextWeek || (basic.date.drop == 1) && !nextWeek) {
@@ -151,12 +157,23 @@ public class EventWeekModelMapper {
                 RealmList<Teacher> teachers = new RealmList<>();
                 for (int k = 0; k < basic.lecturer.size(); k++) {
                     String[] parts = basic.lecturer.get(k).name.split(" ");
-                    teachers.add(Teacher.newBuilder()
-                            .withFirstName(parts[0])
-                            .withSecondName(parts[1])
-                            .withThirdName(parts[2])
-                            .withId(basic.lecturer.get(k).id)
-                            .build());
+                    // TODO убрать этот костыль
+                    if (parts.length == 2) {
+                        teachers.add(Teacher.newBuilder()
+                                .withFirstName(parts[0])
+                                .withSecondName(parts[1])
+                                .withFullName(basic.lecturer.get(k).name)
+                                .withId(basic.lecturer.get(k).id)
+                                .build());
+                    } else {
+                        teachers.add(Teacher.newBuilder()
+                                .withFirstName(parts[0])
+                                .withSecondName(parts[1])
+                                .withThirdName(parts[2])
+                                .withFullName(basic.lecturer.get(k).name)
+                                .withId(basic.lecturer.get(k).id)
+                                .build());
+                    }
                 }
                 // Предмет
                 Subject subject = Subject.newBuilder()
@@ -167,20 +184,27 @@ public class EventWeekModelMapper {
                 String startEventTime = basic.classTime.time.start; //13:20
                 String[] parts1 = startEventTime.split(":");
                 Calendar startCalendar = Calendar.getInstance();
-                startCalendar.set(Calendar.HOUR, Integer.valueOf(parts1[0]));
+                startCalendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+                startCalendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+                startCalendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+                startCalendar.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parts1[0]));
                 startCalendar.set(Calendar.MINUTE, Integer.valueOf(parts1[1]));
+                startCalendar.set(Calendar.SECOND, 0);
                 Date dateStart = startCalendar.getTime();
 
                 String endEventTime = basic.classTime.time.end; //15:05
                 String[] parts2 = endEventTime.split(":");
                 Calendar endCalendar = Calendar.getInstance();
-                endCalendar.set(Calendar.HOUR, Integer.valueOf(parts2[0]));
+                endCalendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+                endCalendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+                endCalendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+                endCalendar.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parts2[0]));
                 endCalendar.set(Calendar.MINUTE, Integer.valueOf(parts2[1]));
+                endCalendar.set(Calendar.SECOND, 0);
                 Date dateEnd = endCalendar.getTime();
 
-                cal.getTime();
                 // от calTime с каким то шагом до dateEndPeriod
-                while (cal.getTime().getTime() > dateEndPeriod.getTime())
+                while (cal.getTime().getTime() <= dateEndPeriod.getTime()) {
                     result.add(Event.newBuilder()
                             .withId(basic.id)
                             .withStartEvent(dateStart)
@@ -191,10 +215,17 @@ public class EventWeekModelMapper {
                             .withTeachers(teachers)
                             .withSubject(subject)
                             .build());
-                if (basic.date.drop == 1 || basic.date.drop == 2) {
-                    cal.add(Calendar.DATE, 14);
-                } else {
-                    cal.add(Calendar.DATE, 7);
+                    if (basic.date.drop == 1 || basic.date.drop == 2) {
+                        cal.add(Calendar.DATE, 14);
+                        startCalendar.add(Calendar.DATE, 14);
+                        endCalendar.add(Calendar.DATE, 14);
+                    } else {
+                        cal.add(Calendar.DATE, 7);
+                        startCalendar.add(Calendar.DATE, 7);
+                        endCalendar.add(Calendar.DATE, 7);
+                    }
+                    dateStart = startCalendar.getTime();
+                    dateEnd = endCalendar.getTime();
                 }
             }
         }
