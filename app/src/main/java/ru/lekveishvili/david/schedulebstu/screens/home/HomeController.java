@@ -63,32 +63,35 @@ public class HomeController extends BaseController {
     private void setModel() {
         Date startPeriod = realm.where(Event.class).minimumDate("startEvent");
         Date endPeriod = realm.where(Event.class).maximumDate("endEvent");
-        Calendar startWeek = Calendar.getInstance();
-        Calendar endWeek = Calendar.getInstance();
-        startWeek.setTime(startPeriod);
-        startWeek.set(Calendar.HOUR_OF_DAY, 1);
-        endWeek.setTime(startPeriod);
-
-        while (endWeek.getTime().getTime() < endPeriod.getTime()) {
-            while (endWeek.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                endWeek.add(Calendar.DATE, 1);
-            }
+        if (startPeriod != null && endPeriod != null) {
+            Calendar startWeek = Calendar.getInstance();
+            Calendar endWeek = Calendar.getInstance();
+            startWeek.setTime(startPeriod);
             startWeek.set(Calendar.HOUR_OF_DAY, 1);
-            Date dateStartWeek = startWeek.getTime();
-            Date dateEndWeek = endWeek.getTime();
-            RealmResults<Event> groups = realm.where(Event.class)
-                    .equalTo("groups.name", "13-ИВТ1")
-                    .between("startEvent", dateStartWeek, dateEndWeek)
-                    .findAllSorted("startEvent");
-            List<Event> eventList = realm.copyFromRealm(groups);
-            weeks.add(eventList);
-            endWeek.add(Calendar.DATE, 1);
-            Date time = endWeek.getTime();
-            startWeek.setTime(time);
+            endWeek.setTime(startPeriod);
+
+            while (endWeek.getTime().getTime() < endPeriod.getTime()) {
+                while (endWeek.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                    endWeek.add(Calendar.DATE, 1);
+                }
+                startWeek.set(Calendar.HOUR_OF_DAY, 1);
+                Date dateStartWeek = startWeek.getTime();
+                Date dateEndWeek = endWeek.getTime();
+                RealmResults<Event> groups = realm.where(Event.class)
+                        .equalTo("groups.name", "13-ИВТ1")
+                        .between("startEvent", dateStartWeek, dateEndWeek)
+                        .findAllSorted("startEvent");
+                List<Event> eventList = realm.copyFromRealm(groups);
+                weeks.add(eventList);
+                endWeek.add(Calendar.DATE, 1);
+                Date time = endWeek.getTime();
+                startWeek.setTime(time);
+            }
+
+            Pager pager = new Pager(weeks);
+            viewPager.setAdapter(pager);
         }
 
-        Pager pager = new Pager(weeks);
-        viewPager.setAdapter(pager);
 //        specificationsSectionAdapter.removeAllSections();
 //        for (int i = 0; i < 5; i++) {
 //            RealmResults<Event> requestEvent2 = realm.where(Event.class).between("startEvent", startDay, endDay).findAll();
