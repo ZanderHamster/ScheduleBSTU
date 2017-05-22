@@ -36,13 +36,13 @@ import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapter;
 
 public class HomeController extends BaseController {
-    private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
+    //    private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
     private Realm realm;
     private List<List<Event>> weeks = new ArrayList<>();
     @BindView(R.id.home_toolbar_title)
     TextView toolbarTitle;
-    @BindView(R.id.home_recycler)
-    RecyclerView homeRecycler;
+    //    @BindView(R.id.home_recycler)
+//    RecyclerView homeRecycler;
     @BindView(R.id.view_pager)
     ViewPager viewPager;
 
@@ -90,82 +90,32 @@ public class HomeController extends BaseController {
 
             Pager pager = new Pager(weeks);
             viewPager.setAdapter(pager);
-        }
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-//        specificationsSectionAdapter.removeAllSections();
-//        for (int i = 0; i < 5; i++) {
-//            RealmResults<Event> requestEvent2 = realm.where(Event.class).between("startEvent", startDay, endDay).findAll();
-//            List<Event> tmpList = new ArrayList<>();
-//            for (int j = 0; j < requestEvent2.size(); j++) {
-//                Event event = realm.copyFromRealm(requestEvent2.get(j));
-//                tmpList.add(event);
-//            }
-//            Collections.reverse(tmpList);
-//            specificationsSectionAdapter.addSection(new HomeSectionAdapter(convertDateToString(startDay), tmpList));
-//            Calendar tmpCal = Calendar.getInstance();
-//            tmpCal.setTime(startDay);
-//            tmpCal.add(Calendar.DATE, 1);
-//            startDay = tmpCal.getTime();
-//            tmpCal.set(Calendar.HOUR_OF_DAY, 24);
-//            tmpCal.set(Calendar.MINUTE, 59);
-//            tmpCal.set(Calendar.SECOND, 59);
-//            endDay = tmpCal.getTime();
-//        }
-//        specificationsSectionAdapter.notifyDataSetChanged();
-    }
+                }
 
-    private String convertDateToString(Date date) {
-        DateFormat dateMonth = new SimpleDateFormat("d", new Locale("ru", "RU"));
-        DateFormat month = new SimpleDateFormat("M", new Locale("ru", "RU"));
-        String dayOfWeek = (new SimpleDateFormat("EEEE", new Locale("ru", "RU"))).format(date);
-        String monthOfYear;
-        switch (Integer.valueOf(month.format(date))) {
-            case 1:
-                monthOfYear = "января";
-                break;
-            case 2:
-                monthOfYear = "февраля";
-                break;
-            case 3:
-                monthOfYear = "марта";
-                break;
-            case 4:
-                monthOfYear = "апреля";
-                break;
-            case 5:
-                monthOfYear = "мая";
-                break;
-            case 6:
-                monthOfYear = "июня";
-                break;
-            case 7:
-                monthOfYear = "июля";
-                break;
-            case 8:
-                monthOfYear = "августа";
-                break;
-            case 9:
-                monthOfYear = "сентября";
-                break;
-            case 10:
-                monthOfYear = "октября";
-                break;
-            case 11:
-                monthOfYear = "ноября";
-                break;
-            case 12:
-                monthOfYear = "декабря";
-                break;
-            default:
-                monthOfYear = "";
-                break;
+                @Override
+                public void onPageSelected(int position) {
+                    viewPager.setCurrentItem(position);
+                    pager.setCurrentWeek(position);
+                    int t = position;
+                    t += 1;
+
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
         }
-        return dayOfWeek + ", " + dateMonth.format(date) + " " + monthOfYear;
     }
 
     private void configureRecycler() {
-        homeRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        homeRecycler.setAdapter(specificationsSectionAdapter);
+//        homeRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+//        homeRecycler.setAdapter(specificationsSectionAdapter);
     }
 
     private void configureToolbar() {

@@ -21,10 +21,17 @@ import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapt
 
 public class Pager extends PagerAdapter {
     private List<List<Event>> weeks = new ArrayList<>();
+    private List<Event> currentWeek = new ArrayList<>();
     private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
 
     public Pager(List<List<Event>> weeks) {
         this.weeks = weeks;
+        this.currentWeek = weeks.get(0);
+    }
+
+    public void setCurrentWeek(int position) {
+        currentWeek = weeks.get(position);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -41,36 +48,42 @@ public class Pager extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         RecyclerView recyclerView = new RecyclerView(container.getContext());
         specificationsSectionAdapter.removeAllSections();
-        List<Event> eventList = weeks.get(position);
-        for (int i = 0; i < weeks.size(); i++) {
-//            Collections.reverse(list);
-            Date startDay = weeks.get(i).get(0).getStartEvent();
-            Calendar  cal = Calendar.getInstance();
-            cal.setTime(startDay);
-            int i1 = cal.get(Calendar.DAY_OF_YEAR);
-            List<Event> eventsFromOneDay = new ArrayList<>();
-            List<Event> tmp = new ArrayList<>(eventsFromOneDay);
+        List<Event> eventList = currentWeek;
+        boolean flag = false;
+        Date startDay = currentWeek.get(0).getStartEvent();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(startDay);
+        List<Event> eventsFromOneDay = new ArrayList<>();
 
-            for (int j = 0; j < weeks.get(i).size(); j++) {
-                List<Event> eventWeekList = weeks.get(i);
-                Date startEvent = eventWeekList.get(j).getStartEvent();
-                Calendar cal2 = Calendar.getInstance();
-                cal2.setTime(startEvent);
+        for (int j = 0; j < currentWeek.size(); j++) {
+            List<Event> eventWeekList = currentWeek;
+            Date startEvent = eventWeekList.get(j).getStartEvent();
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(startEvent);
 
-                if (i1 == cal2.get(Calendar.DAY_OF_YEAR)) {
-                    eventsFromOneDay.add(eventWeekList.get(j));
-                } else {
-                    cal.add(Calendar.DATE, 1);
-                    eventsFromOneDay.clear();
-                    eventsFromOneDay.add(eventWeekList.get(j));
-                }
-                List<Event> list = weeks.get(i);
+            if (cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) {
+                eventsFromOneDay.add(eventWeekList.get(j));
+            } else {
+                flag = true;
+                cal.add(Calendar.DATE, 1);
+                specificationsSectionAdapter.addSection(
+                        new HomeSectionAdapter(convertDateToString(
+                                new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
+                                new ArrayList<>(eventsFromOneDay)));
+                eventsFromOneDay.clear();
+                eventsFromOneDay.add(eventWeekList.get(j));
             }
+            if (j == currentWeek.size() - 1) {
+                flag = false;
+            }
+        }
+        if (!flag) {
             specificationsSectionAdapter.addSection(
                     new HomeSectionAdapter(convertDateToString(
                             new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
                             new ArrayList<>(eventsFromOneDay)));
         }
+//        }
         specificationsSectionAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
         recyclerView.setAdapter(specificationsSectionAdapter);
@@ -126,6 +139,7 @@ public class Pager extends PagerAdapter {
         }
         return dayOfWeek + ", " + dateMonth.format(date) + " " + monthOfYear;
     }
+
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
