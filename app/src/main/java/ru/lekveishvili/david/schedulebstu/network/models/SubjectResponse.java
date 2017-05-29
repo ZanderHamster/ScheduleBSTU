@@ -8,8 +8,8 @@ public class SubjectResponse {
 
     @SerializedName("message")
     public String message;
-    @SerializedName("subjects")
-    public List<Subject> subjects = null;
+    @SerializedName("data")
+    public List<Subject> data = null;
 
     public class Subject {
 

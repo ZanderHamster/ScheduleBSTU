@@ -9,7 +9,7 @@ public class GroupResponse {
     @SerializedName("message")
     public String message;
     @SerializedName("groups")
-    public List<Group> groups = null;
+    public List<Group> data = null;
 
     public static class Group {
 

@@ -18,18 +18,19 @@ public class TeacherModelMapper {
 
     public List<Teacher> transform(TeacherResponse teacherResponse) {
         List<Teacher> result = new ArrayList<>();
-
-        for (int i = 0; i < teacherResponse.lecturers.size(); i++) {
-            TeacherResponse.Lecturer teacher = teacherResponse.lecturers.get(i);
-            String fullName = teacher.name;
-            String[] parts = fullName.split(" ");
-            result.add(Teacher.newBuilder()
-                    .withFirstName(parts[0])
-                    .withSecondName(parts[1])
-                    .withThirdName(parts[2])
-                    .withId(teacher.id)
-                    .withFullName(fullName)
-                    .build());
+        if (teacherResponse.data != null) {
+            for (int i = 0; i < teacherResponse.data.size(); i++) {
+                TeacherResponse.Lecturer teacher = teacherResponse.data.get(i);
+                String fullName = teacher.name;
+                String[] parts = fullName.split(" ");
+                result.add(Teacher.newBuilder()
+                        .withFirstName(parts[0])
+                        .withSecondName(parts[1])
+                        .withThirdName(parts[2])
+                        .withId(teacher.id)
+                        .withFullName(fullName)
+                        .build());
+            }
         }
         return result;
     }

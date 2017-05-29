@@ -4,20 +4,23 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class RoomResponse {
+public class AuthResponse {
+
     @SerializedName("message")
     public String message;
-
     @SerializedName("data")
-    public List<LectureHall> data = null;
+    public Data data;
 
-    public class LectureHall {
+    public class Data {
 
         @SerializedName("name")
         public String name;
-        @SerializedName("id")
-        public String id;
+        @SerializedName("typeUser")
+        public String typeUser;
+        @SerializedName("groups")
+        public List<String> groups = null;
+        @SerializedName("token")
+        public String token;
 
     }
-
 }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/search_toolbar"
         style="@style/ToolbarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:contentInsetEnd="0dp"
         app:contentInsetLeft="0dp"
         app:contentInsetRight="0dp"
-        app:contentInsetStart="0dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        app:contentInsetStart="0dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -30,12 +30,51 @@
                 android:textSize="20sp" />
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
-<EditText
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:focusableInTouchMode="true"
-    android:imeActionLabel="Done"
-    android:imeOptions="actionDone"
-    android:inputType="text" />
+
+    <TabHost
+        android:id="@+id/search_tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RelativeLayout
+                    android:id="@+id/search_teachers_tab"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/search_groups_tab"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2" />
+                </RelativeLayout>
+
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
 
 </LinearLayout>

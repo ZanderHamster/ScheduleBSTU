@@ -1,8 +1,11 @@
 package ru.lekveishvili.david.schedulebstu.network.service;
 
 import io.reactivex.Observable;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
+import retrofit2.http.POST;
+import ru.lekveishvili.david.schedulebstu.network.models.AuthRequest;
+import ru.lekveishvili.david.schedulebstu.network.models.AuthResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventTypesResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventWeekResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.GroupResponse;
@@ -11,6 +14,9 @@ import ru.lekveishvili.david.schedulebstu.network.models.SubjectResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.TeacherResponse;
 
 public interface MainApiService {
+    @POST("auth")
+    Observable<AuthResponse> auth(@Body AuthRequest authRequest);
+
     @GET("group/count/all")
     Observable<GroupResponse> getGroups();
 
@@ -31,6 +37,4 @@ public interface MainApiService {
 
     @GET("/event/week/2017-09-11/group/13-%D0%98%D0%92%D0%A21")
     Observable<EventWeekResponse> getEventsWeekGroup();
-
-
 }

@@ -14,15 +14,17 @@ public class GroupModelMapper {
         this.mainApiService = mainApiService;
     }
 
-    public List<Group> transform(GroupResponse groupResponse){
+    public List<Group> transform(GroupResponse groupResponse) {
         List<Group> result = new ArrayList<>();
 
-        for (int i = 0; i < groupResponse.groups.size(); i++) {
-            GroupResponse.Group group = groupResponse.groups.get(i);
-            result.add(Group.newBuilder()
-                    .withName(group.name)
-                    .withId(group.id)
-                    .build());
+        if (groupResponse.data != null) {
+            for (int i = 0; i < groupResponse.data.size(); i++) {
+                GroupResponse.Group group = groupResponse.data.get(i);
+                result.add(Group.newBuilder()
+                        .withName(group.name)
+                        .withId(group.id)
+                        .build());
+            }
         }
         return result;
     }

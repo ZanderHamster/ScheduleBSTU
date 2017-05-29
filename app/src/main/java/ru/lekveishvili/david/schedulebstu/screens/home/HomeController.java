@@ -36,13 +36,10 @@ import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapter;
 
 public class HomeController extends BaseController {
-    //    private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
     private Realm realm;
     private List<List<Event>> weeks = new ArrayList<>();
     @BindView(R.id.home_toolbar_title)
     TextView toolbarTitle;
-    //    @BindView(R.id.home_recycler)
-//    RecyclerView homeRecycler;
     @BindView(R.id.view_pager)
     ViewPager viewPager;
 
@@ -56,7 +53,6 @@ public class HomeController extends BaseController {
         super.onViewBound(view);
         realm = Realm.getDefaultInstance();
         configureToolbar();
-        configureRecycler();
         setModel();
     }
 
@@ -111,11 +107,6 @@ public class HomeController extends BaseController {
                 }
             });
         }
-    }
-
-    private void configureRecycler() {
-//        homeRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-//        homeRecycler.setAdapter(specificationsSectionAdapter);
     }
 
     private void configureToolbar() {

@@ -18,13 +18,14 @@ public class EventTypeModelMapper {
 
     public List<EventType> transform(EventTypesResponse eventTypeResponse) {
         List<EventType> result = new ArrayList<>();
-
-        for (int i = 0; i < eventTypeResponse.eventTypes.size(); i++) {
-            EventTypesResponse.EventType eventType = eventTypeResponse.eventTypes.get(i);
-            result.add(EventType.newBuilder()
-                    .withName(eventType.name)
-                    .withId(eventType.id)
-                    .build());
+        if (eventTypeResponse.data != null) {
+            for (int i = 0; i < eventTypeResponse.data.size(); i++) {
+                EventTypesResponse.EventType eventType = eventTypeResponse.data.get(i);
+                result.add(EventType.newBuilder()
+                        .withName(eventType.name)
+                        .withId(eventType.id)
+                        .build());
+            }
         }
         return result;
     }

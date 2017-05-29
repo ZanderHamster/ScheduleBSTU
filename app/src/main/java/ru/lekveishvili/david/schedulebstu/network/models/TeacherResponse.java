@@ -9,7 +9,7 @@ public class TeacherResponse {
     @SerializedName("message")
     public String message;
     @SerializedName("lecturers")
-    public List<Lecturer> lecturers = null;
+    public List<Lecturer> data = null;
 
 
     public class Lecturer {

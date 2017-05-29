@@ -9,7 +9,7 @@ public class EventTypesResponse {
     @SerializedName("message")
     public String message;
     @SerializedName("eventTypes")
-    public List<EventType> eventTypes = null;
+    public List<EventType> data = null;
 
     public class EventType {
 

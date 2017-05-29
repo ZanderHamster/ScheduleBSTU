@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import butterknife.BindView;
@@ -19,6 +20,10 @@ import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 public class SearchController extends BaseController {
     @BindView(R.id.search_toolbar_title)
     TextView toolbarTitle;
+    @BindView(R.id.search_tabhost)
+    TabHost tabHost;
+
+
     private Realm realm;
 
     @Override
@@ -32,20 +37,25 @@ public class SearchController extends BaseController {
 
         realm = Realm.getDefaultInstance();
         configureToolbar();
+        configureTabs();
         configureList();
     }
 
+    private void configureTabs() {
+        tabHost.setup();
+
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1")
+                .setIndicator("Группы")
+                .setContent(R.id.search_groups_tab);
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec("tag2")
+                .setIndicator("Преподаватели")
+                .setContent(R.id.search_teachers_tab);
+        tabHost.addTab(tabSpec);
+    }
+
     private void configureList() {
-        realm.beginTransaction();
-        RealmResults<Event> requestEvent = realm.where(Event.class).findAll();
-        if (!requestEvent.isEmpty()) {
-            int t = 3;
-            String s = String.valueOf(t);
-        } else {
-            int t = 5;
-            String s = String.valueOf(t);
-        }
-        realm.commitTransaction();
     }
 
     private void configureToolbar() {

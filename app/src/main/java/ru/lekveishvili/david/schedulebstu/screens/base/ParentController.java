@@ -8,6 +8,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.Router;
@@ -43,6 +44,9 @@ import ru.lekveishvili.david.schedulebstu.network.usecase.GetGroupUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetRoomUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetSubjectUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetTeacherUseCase;
+import ru.lekveishvili.david.schedulebstu.screens.account.AccountController;
+import ru.lekveishvili.david.schedulebstu.screens.home.HomeController;
+import ru.lekveishvili.david.schedulebstu.screens.search.SearchController;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
 import ru.lekveishvili.david.schedulebstu.util.Utils;
@@ -60,13 +64,6 @@ public class ParentController extends BaseController {
     @Inject
     BottomNavigationService bottomNavigationService;
 
-
-    GetRoomUseCase getRoomUseCase;
-    GetGroupUseCase getGroupUseCase;
-    GetSubjectUseCase getSubjectUseCase;
-    GetTeacherUseCase getTeacherUseCase;
-    GetEventTypeUseCase getEventTypeUseCase;
-    GetEventWeekUseCase getEventWeekUseCase;
 
     private Realm realm;
     private Tag tag;
@@ -108,15 +105,157 @@ public class ParentController extends BaseController {
     }
 
 
+    private void subscribeToBottomNavigationState() {
+        bottomNavigationSubscription = bottomNavigationService.getBottomNavigationVisibilityObservable()
+                .debounce(100, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(visible -> {
+                    if (visible) {
+                        showBottomNavigation();
+                    } else {
+                        hideBottomNavigation();
+                    }
+                });
+    }
+
+    private void hideBottomNavigation() {
+        if (bottomNavigationView.getVisibility() == View.GONE) return;
+        Resources resources = getResources();
+        if (resources == null) return;
+
+        bottomNavigationView.setVisibility(View.GONE);
+        ViewGroup.LayoutParams layoutParams = parentSubControllersContainer.getLayoutParams();
+        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) layoutParams;
+            resources.getDimension(R.dimen.bottom_navigation_view_height);
+            marginLayoutParams.setMargins(
+                    marginLayoutParams.leftMargin,
+                    marginLayoutParams.topMargin,
+                    marginLayoutParams.rightMargin,
+                    0
+            );
+        }
+    }
+
+    private void showBottomNavigation() {
+        if (bottomNavigationView.getVisibility() == View.VISIBLE) return;
+        Resources resources = getResources();
+        if (resources == null) return;
+        bottomNavigationView.setVisibility(View.VISIBLE);
+        ViewGroup.LayoutParams layoutParams = parentSubControllersContainer.getLayoutParams();
+        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) layoutParams;
+
+            marginLayoutParams.setMargins(
+                    marginLayoutParams.leftMargin,
+                    marginLayoutParams.topMargin,
+                    marginLayoutParams.rightMargin,
+                    (int) resources.getDimension(R.dimen.bottom_navigation_view_height)
+            );
+        }
+    }
+
+    private void configureBottomNavMenu() {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.menu_home:
+                    goToSubControllerByTag(Tag.HOME);
+                    break;
+                case R.id.menu_search:
+                    goToSubControllerByTag(Tag.SEARCH);
+                    break;
+                case R.id.menu_account:
+                    goToSubControllerByTag(Tag.ACCOUNT);
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        });
+    }
+
+    private void goToSubControllerByTag(Tag tag) {
+        List<RouterTransaction> backstack = bottomNavigationRouter.getBackstack();
+        RouterTransaction transaction;
+        Controller controller;
+        boolean controllerAlreadyInBackstack = false;
+        ListIterator<RouterTransaction> iterator = backstack.listIterator();
+        while (iterator.hasNext()) {
+            transaction = iterator.next();
+            if (tag.toString().equals(transaction.tag())) {
+                controllerAlreadyInBackstack = true;
+                if (iterator.hasNext()) {
+                    iterator.remove();
+                    backstack.add(transaction);
+                    bottomNavigationRouter.setBackstack(backstack, null);
+                } else {
+                    controller = transaction.controller();
+                    Router childRouter = ((ParentSubController) controller).getChildRouter();
+                    childRouter.popToRoot();
+                }
+                break;
+            }
+        }
+
+        if (!controllerAlreadyInBackstack) {
+            controller = new ParentSubController(tag);
+            transaction = RouterTransaction.with(controller).tag(tag.toString());
+            bottomNavigationRouter.pushController(transaction);
+        }
+
+    }
+
+    private void setRouterRootIfNeeded() {
+        if (bottomNavigationRouter == null) {
+            bottomNavigationRouter = getChildRouter(parentSubControllersContainer, tag.toString());
+        }
+
+        if (bottomNavigationRouter.hasRootController()) return;
+
+        Controller controller = new ParentSubController(tag);
+        bottomNavigationRouter.setRoot(RouterTransaction.with(controller));
+    }
+
+    @Override
+    protected void onDestroyView(@NonNull final View view) {
+        super.onDestroyView(view);
+        realm.close();
+        if (bottomNavigationSubscription != null && !bottomNavigationSubscription.isDisposed()) {
+            bottomNavigationSubscription.dispose();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putSerializable(KEY_TAG, tag);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        tag = (Tag) savedInstanceState.getSerializable(KEY_TAG);
+    }
+
+    public enum Tag {
+        HOME,
+        SEARCH,
+        ACCOUNT
+    }
+
+
     private void fetchData() {
         if (Utils.isOnline(getApplicationContext())) {
             MainApiService apiService = RetrofitClient.getMainApiService();
-            getGroupUseCase = new GetGroupUseCase(apiService);
-            getRoomUseCase = new GetRoomUseCase(apiService);
-            getSubjectUseCase = new GetSubjectUseCase(apiService);
-            getTeacherUseCase = new GetTeacherUseCase(apiService);
-            getEventTypeUseCase = new GetEventTypeUseCase(apiService);
-            getEventWeekUseCase = new GetEventWeekUseCase(apiService);
+
+            GetGroupUseCase getGroupUseCase = new GetGroupUseCase(apiService);
+            GetRoomUseCase getRoomUseCase = new GetRoomUseCase(apiService);
+            GetSubjectUseCase getSubjectUseCase = new GetSubjectUseCase(apiService);
+            GetTeacherUseCase getTeacherUseCase = new GetTeacherUseCase(apiService);
+            GetEventTypeUseCase getEventTypeUseCase = new GetEventTypeUseCase(apiService);
+            GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(apiService);
+
             getGroupUseCase.execute()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -370,143 +509,4 @@ public class ParentController extends BaseController {
         return tmpList;
     }
     ///----------------///
-
-    private void subscribeToBottomNavigationState() {
-        bottomNavigationSubscription = bottomNavigationService.getBottomNavigationVisibilityObservable()
-                .debounce(100, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(visible -> {
-                    if (visible) {
-                        showBottomNavigation();
-                    } else {
-                        hideBottomNavigation();
-                    }
-                });
-    }
-
-    private void hideBottomNavigation() {
-        if (bottomNavigationView.getVisibility() == View.GONE) return;
-        Resources resources = getResources();
-        if (resources == null) return;
-
-        bottomNavigationView.setVisibility(View.GONE);
-        ViewGroup.LayoutParams layoutParams = parentSubControllersContainer.getLayoutParams();
-        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) layoutParams;
-            resources.getDimension(R.dimen.bottom_navigation_view_height);
-            marginLayoutParams.setMargins(
-                    marginLayoutParams.leftMargin,
-                    marginLayoutParams.topMargin,
-                    marginLayoutParams.rightMargin,
-                    0
-            );
-        }
-    }
-
-    private void showBottomNavigation() {
-        if (bottomNavigationView.getVisibility() == View.VISIBLE) return;
-        Resources resources = getResources();
-        if (resources == null) return;
-        bottomNavigationView.setVisibility(View.VISIBLE);
-        ViewGroup.LayoutParams layoutParams = parentSubControllersContainer.getLayoutParams();
-        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) layoutParams;
-
-            marginLayoutParams.setMargins(
-                    marginLayoutParams.leftMargin,
-                    marginLayoutParams.topMargin,
-                    marginLayoutParams.rightMargin,
-                    (int) resources.getDimension(R.dimen.bottom_navigation_view_height)
-            );
-        }
-    }
-
-    private void configureBottomNavMenu() {
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.menu_home:
-                    goToSubControllerByTag(Tag.HOME);
-                    break;
-                case R.id.menu_search:
-                    goToSubControllerByTag(Tag.SEARCH);
-                    break;
-                case R.id.menu_account:
-                    goToSubControllerByTag(Tag.ACCOUNT);
-                    break;
-                default:
-                    break;
-            }
-            return true;
-        });
-    }
-
-    private void goToSubControllerByTag(Tag tag) {
-        List<RouterTransaction> backstack = bottomNavigationRouter.getBackstack();
-        RouterTransaction transaction;
-        Controller controller;
-        boolean controllerAlreadyInBackstack = false;
-        ListIterator<RouterTransaction> iterator = backstack.listIterator();
-        while (iterator.hasNext()) {
-            transaction = iterator.next();
-            if (tag.toString().equals(transaction.tag())) {
-                controllerAlreadyInBackstack = true;
-                if (iterator.hasNext()) {
-                    iterator.remove();
-                    backstack.add(transaction);
-                    bottomNavigationRouter.setBackstack(backstack, null);
-                } else {
-                    controller = transaction.controller();
-                    Router childRouter = ((ParentSubController) controller).getChildRouter();
-                    childRouter.popToRoot();
-                }
-                break;
-            }
-        }
-
-        if (!controllerAlreadyInBackstack) {
-            controller = new ParentSubController(tag);
-            transaction = RouterTransaction.with(controller).tag(tag.toString());
-            bottomNavigationRouter.pushController(transaction);
-        }
-
-    }
-
-    private void setRouterRootIfNeeded() {
-        if (bottomNavigationRouter == null) {
-            bottomNavigationRouter = getChildRouter(parentSubControllersContainer, tag.toString());
-        }
-
-        if (bottomNavigationRouter.hasRootController()) return;
-
-        Controller controller = new ParentSubController(tag);
-        bottomNavigationRouter.setRoot(RouterTransaction.with(controller));
-    }
-
-    @Override
-    protected void onDestroyView(@NonNull final View view) {
-        super.onDestroyView(view);
-        realm.close();
-        if (bottomNavigationSubscription != null && !bottomNavigationSubscription.isDisposed()) {
-            bottomNavigationSubscription.dispose();
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putSerializable(KEY_TAG, tag);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        tag = (Tag) savedInstanceState.getSerializable(KEY_TAG);
-    }
-
-    public enum Tag {
-        HOME,
-        SEARCH,
-        ACCOUNT
-    }
 }
