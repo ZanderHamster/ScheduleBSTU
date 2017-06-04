@@ -51,6 +51,7 @@ public class Pager extends PagerAdapter {
         List<Event> eventList = currentWeek;
         boolean flag = false;
         Date startDay = currentWeek.get(0).getStartEvent();
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(startDay);
         List<Event> eventsFromOneDay = new ArrayList<>();

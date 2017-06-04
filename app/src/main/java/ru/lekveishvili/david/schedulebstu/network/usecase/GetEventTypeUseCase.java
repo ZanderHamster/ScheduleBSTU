@@ -11,14 +11,16 @@ import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 
 public class GetEventTypeUseCase {
     private final MainApiService mainApiService;
+    private String token;
 
-    public GetEventTypeUseCase(MainApiService mainApiService) {
+    public GetEventTypeUseCase(MainApiService mainApiService, String token) {
         this.mainApiService = mainApiService;
+        this.token = token;
     }
 
     public Observable<List<EventType>> execute() {
         EventTypeModelMapper mapper = new EventTypeModelMapper(mainApiService);
-        return mainApiService.getEventTypes()
+        return mainApiService.getEventTypes(token)
                 .map(mapper::transform);
     }
 }

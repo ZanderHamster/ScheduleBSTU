@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
+import ru.lekveishvili.david.schedulebstu.SessionService;
 
 @Module
 public class AppModule {
@@ -27,5 +28,11 @@ public class AppModule {
     @Singleton
     Resources provideResources() {
         return application.getResources();
+    }
+
+    @Provides
+    @Singleton
+    SessionService provideSessionService() {
+        return new SessionService();
     }
 }

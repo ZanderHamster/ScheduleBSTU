@@ -11,14 +11,16 @@ import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 
 public class GetRoomUseCase {
     private final MainApiService mainApiService;
+    private String token;
 
-    public GetRoomUseCase(MainApiService mainApiService) {
+    public GetRoomUseCase(MainApiService mainApiService, String token) {
         this.mainApiService = mainApiService;
+        this.token = token;
     }
 
     public Observable<List<Room>> execute() {
         RoomModelMapper mapper = new RoomModelMapper(mainApiService);
-        return mainApiService.getRooms()
+        return mainApiService.getRooms(token)
                 .map(mapper::transform);
     }
 }

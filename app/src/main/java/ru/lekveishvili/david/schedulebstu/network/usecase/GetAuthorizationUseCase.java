@@ -1,7 +1,5 @@
 package ru.lekveishvili.david.schedulebstu.network.usecase;
 
-import java.util.List;
-
 import io.reactivex.Observable;
 import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.network.mappers.AuthMapper;
@@ -10,14 +8,16 @@ import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 
 public class GetAuthorizationUseCase {
     private final MainApiService mainApiService;
+    private String token;
 
-    public GetAuthorizationUseCase(MainApiService mainApiService) {
+    public GetAuthorizationUseCase(MainApiService mainApiService, String token) {
         this.mainApiService = mainApiService;
+        this.token = token;
     }
 
     public Observable<Authorization> execute(AuthRequest authRequest) {
         AuthMapper mapper = new AuthMapper(mainApiService);
-        return mainApiService.auth(authRequest)
+        return mainApiService.auth(token, authRequest)
                 .map(mapper::transform);
     }
 }

@@ -20,6 +20,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
+import ru.lekveishvili.david.schedulebstu.SessionService;
 import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
 import ru.lekveishvili.david.schedulebstu.network.models.AuthRequest;
@@ -43,6 +44,8 @@ public class AuthorizationController extends BaseController {
 
     @Inject
     BottomNavigationService bottomNavigationService;
+    @Inject
+    SessionService sessionService;
 
     private Realm realm;
     private GetAuthorizationUseCase getAuthorizationUseCase;
@@ -61,7 +64,7 @@ public class AuthorizationController extends BaseController {
         realm = Realm.getDefaultInstance();
 
         MainApiService apiService = RetrofitClient.getMainApiService();
-        getAuthorizationUseCase = new GetAuthorizationUseCase(apiService);
+        getAuthorizationUseCase = new GetAuthorizationUseCase(apiService, sessionService.getToken());
 
         AutoLogin();
 
@@ -74,8 +77,8 @@ public class AuthorizationController extends BaseController {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::setAuthorization,
-                        throwable -> Toast.makeText(view.getContext(), "Error", Toast.LENGTH_SHORT).show(),
-                        () -> startUsing()
+                        throwable -> Toast.makeText(view.getContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show(),
+                        this::startUsing
                 ));
 
     }
@@ -95,8 +98,8 @@ public class AuthorizationController extends BaseController {
     }
 
     private void AutoLogin() {
-        etLogin.setText("akhremenko-sergey-mikhaylovich");
-        etPassword.setText("temp");
+        etLogin.setText("admin");
+        etPassword.setText("JdLAmd29Fmds");
     }
 
     @Override

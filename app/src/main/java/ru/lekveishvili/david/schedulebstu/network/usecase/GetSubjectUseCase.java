@@ -11,14 +11,16 @@ import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 
 public class GetSubjectUseCase {
     private final MainApiService mainApiService;
+    private String token;
 
-    public GetSubjectUseCase(MainApiService mainApiService) {
+    public GetSubjectUseCase(MainApiService mainApiService, String token) {
         this.mainApiService = mainApiService;
+        this.token = token;
     }
 
     public Observable<List<Subject>> execute() {
         SubjectModelMapper mapper = new SubjectModelMapper(mainApiService);
-        return mainApiService.getSubjects()
+        return mainApiService.getSubjects(token)
                 .map(mapper::transform);
     }
 }

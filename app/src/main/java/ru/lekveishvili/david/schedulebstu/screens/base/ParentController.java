@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import io.realm.RealmList;
 import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
+import ru.lekveishvili.david.schedulebstu.SessionService;
 import ru.lekveishvili.david.schedulebstu.models.Event;
 import ru.lekveishvili.david.schedulebstu.models.EventType;
 import ru.lekveishvili.david.schedulebstu.models.Group;
@@ -63,6 +65,8 @@ public class ParentController extends BaseController {
     ViewGroup parentSubControllersContainer;
     @Inject
     BottomNavigationService bottomNavigationService;
+    @Inject
+    SessionService sessionService;
 
 
     private Realm realm;
@@ -249,12 +253,12 @@ public class ParentController extends BaseController {
         if (Utils.isOnline(getApplicationContext())) {
             MainApiService apiService = RetrofitClient.getMainApiService();
 
-            GetGroupUseCase getGroupUseCase = new GetGroupUseCase(apiService);
-            GetRoomUseCase getRoomUseCase = new GetRoomUseCase(apiService);
-            GetSubjectUseCase getSubjectUseCase = new GetSubjectUseCase(apiService);
-            GetTeacherUseCase getTeacherUseCase = new GetTeacherUseCase(apiService);
-            GetEventTypeUseCase getEventTypeUseCase = new GetEventTypeUseCase(apiService);
-            GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(apiService);
+            GetGroupUseCase getGroupUseCase = new GetGroupUseCase(apiService, sessionService.getToken());
+            GetRoomUseCase getRoomUseCase = new GetRoomUseCase(apiService, sessionService.getToken());
+            GetSubjectUseCase getSubjectUseCase = new GetSubjectUseCase(apiService, sessionService.getToken());
+            GetTeacherUseCase getTeacherUseCase = new GetTeacherUseCase(apiService, sessionService.getToken());
+            GetEventTypeUseCase getEventTypeUseCase = new GetEventTypeUseCase(apiService, sessionService.getToken());
+            GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(apiService, sessionService.getToken());
 
             getGroupUseCase.execute()
                     .subscribeOn(Schedulers.io())
@@ -354,9 +358,11 @@ public class ParentController extends BaseController {
         realm.beginTransaction();
         RealmResults<Teacher> requestTeacher = realm.where(Teacher.class).findAll();
         List<Teacher> tmpTeacherList = new ArrayList<>();
+        Log.d("befor", requestTeacher.size() + "/" + teachers.size());
         for (int i = 0; i < requestTeacher.size(); i++) {
             tmpTeacherList.add(requestTeacher.get(i));
         }
+        Log.d("compil", tmpTeacherList.size() + " ");
         for (int i = 0; i < teachers.size(); i++) {
             if (containsTeacher(tmpTeacherList, teachers.get(i))) {
                 tmpTeacherList = removeItemFromListTeacher(tmpTeacherList, teachers.get(i));

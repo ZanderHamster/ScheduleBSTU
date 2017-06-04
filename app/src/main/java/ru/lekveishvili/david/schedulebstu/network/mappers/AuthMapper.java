@@ -18,17 +18,19 @@ public class AuthMapper {
         String fullName = authResponse.data.name;
         String[] parts = fullName.split(" ");
         RealmList<Group> groupList = new RealmList<>();
-        for (int i = 0; i < authResponse.data.groups.size(); i++) {
-            groupList.add(Group.newBuilder()
-                    .withName(authResponse.data.groups.get(i))
-                    .build());
+        if (authResponse.data.groups != null) {
+            for (int i = 0; i < authResponse.data.groups.size(); i++) {
+                groupList.add(Group.newBuilder()
+                        .withName(authResponse.data.groups.get(i))
+                        .build());
+            }
         }
         //TODO сделать нормальный парсер, независящий от колличества пробелов в имени
         return Authorization.newBuilder()
                 .withFullName(fullName)
-                .withFirstName(parts[0])
-                .withSecondName(parts[1])
-                .withThirdName(parts[2])
+//                .withFirstName(parts[0])
+//                .withSecondName(parts[1])
+//                .withThirdName(parts[2])
                 .withToken(authResponse.data.token)
                 .withTypeUser(authResponse.data.typeUser)
                 .withGroups(groupList)

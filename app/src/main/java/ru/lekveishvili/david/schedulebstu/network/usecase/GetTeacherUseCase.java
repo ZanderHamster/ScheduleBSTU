@@ -11,14 +11,16 @@ import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 
 public class GetTeacherUseCase {
     private final MainApiService mainApiService;
+    private String token;
 
-    public GetTeacherUseCase(MainApiService mainApiService) {
+    public GetTeacherUseCase(MainApiService mainApiService, String token) {
         this.mainApiService = mainApiService;
+        this.token = token;
     }
 
     public Observable<List<Teacher>> execute() {
         TeacherModelMapper mapper = new TeacherModelMapper(mainApiService);
-        return mainApiService.getTeachers()
+        return mainApiService.getTeachers(token)
                 .map(mapper::transform);
     }
 }

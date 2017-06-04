@@ -14,8 +14,8 @@ public interface HomeComponent {
     @Module
     class GroupControllerModule {
         @Provides
-        GetGroupUseCase provideGetGroupUseCase(MainApiService mainApiService) {
-            return new GetGroupUseCase(mainApiService);
+        GetGroupUseCase provideGetGroupUseCase(MainApiService mainApiService, String token) {
+            return new GetGroupUseCase(mainApiService, token);
         }
     }
 }

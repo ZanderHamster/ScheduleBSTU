@@ -3,6 +3,7 @@ package ru.lekveishvili.david.schedulebstu.network.service;
 import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import ru.lekveishvili.david.schedulebstu.network.models.AuthRequest;
 import ru.lekveishvili.david.schedulebstu.network.models.AuthResponse;
@@ -15,26 +16,27 @@ import ru.lekveishvili.david.schedulebstu.network.models.TeacherResponse;
 
 public interface MainApiService {
     @POST("auth")
-    Observable<AuthResponse> auth(@Body AuthRequest authRequest);
+    Observable<AuthResponse> auth(@Header("X-Auth-Token") String token,
+                                  @Body AuthRequest authRequest);
 
     @GET("group/count/all")
-    Observable<GroupResponse> getGroups();
+    Observable<GroupResponse> getGroups(@Header("X-Auth-Token") String token);
 
     @GET("lectureHall/count/all")
-    Observable<RoomResponse> getRooms();
+    Observable<RoomResponse> getRooms(@Header("X-Auth-Token") String token);
 
     @GET("subject/count/all")
-    Observable<SubjectResponse> getSubjects();
+    Observable<SubjectResponse> getSubjects(@Header("X-Auth-Token") String token);
 
     @GET("lecture/count/all")
-    Observable<TeacherResponse> getTeachers();
+    Observable<TeacherResponse> getTeachers(@Header("X-Auth-Token") String token);
 
     @GET("eventType/count/all")
-    Observable<EventTypesResponse> getEventTypes();
+    Observable<EventTypesResponse> getEventTypes(@Header("X-Auth-Token") String token);
 
 //    @GET("/event/week/{date}/group/{group}")
 //    Observable<EventWeekResponse> getEventsWeekGroup(@Path("date") String date, @Path("group") String group);
 
     @GET("/event/week/2017-09-11/group/13-%D0%98%D0%92%D0%A21")
-    Observable<EventWeekResponse> getEventsWeekGroup();
+    Observable<EventWeekResponse> getEventsWeekGroup(@Header("X-Auth-Token") String token);
 }
