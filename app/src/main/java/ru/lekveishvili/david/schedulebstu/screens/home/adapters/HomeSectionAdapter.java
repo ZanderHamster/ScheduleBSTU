@@ -20,6 +20,7 @@ import ru.lekveishvili.david.schedulebstu.models.Event;
 public class HomeSectionAdapter extends StatelessSection {
     private String header;
     private List<Event> eventList;
+    public ItemClickListener onItemClickListener;
 
     public HomeSectionAdapter(String header, List<Event> eventList) {
         super(R.layout.day_section_header, R.layout.day_section_item);
@@ -93,6 +94,16 @@ public class HomeSectionAdapter extends StatelessSection {
             itemHolder.borderLine.setVisibility(View.GONE);
             itemHolder.layout.setBackground(itemHolder.layout.getResources().getDrawable(R.drawable.day_bottom));
         }
+        // Нажатие на жлемент списка
+        itemHolder.layout.setOnClickListener(v -> onItemClickListener.onClick(event));
+    }
+
+    public void setOnItemClickListener(ItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
+    public interface ItemClickListener {
+        void onClick(Event event);
     }
 
     static class ItemViewHolder extends RecyclerView.ViewHolder {

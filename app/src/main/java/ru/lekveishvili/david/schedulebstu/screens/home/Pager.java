@@ -23,6 +23,7 @@ public class Pager extends PagerAdapter {
     private List<List<Event>> weeks = new ArrayList<>();
     private List<Event> currentWeek = new ArrayList<>();
     private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
+    public ItemClickListener onItemClickListenerr;
 
     public Pager(List<List<Event>> weeks) {
         this.weeks = weeks;
@@ -48,7 +49,6 @@ public class Pager extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         RecyclerView recyclerView = new RecyclerView(container.getContext());
         specificationsSectionAdapter.removeAllSections();
-        List<Event> eventList = currentWeek;
         boolean flag = false;
         Date startDay = currentWeek.get(0).getStartEvent();
 
@@ -67,10 +67,12 @@ public class Pager extends PagerAdapter {
             } else {
                 flag = true;
                 cal.add(Calendar.DATE, 1);
+                HomeSectionAdapter section = new HomeSectionAdapter(convertDateToString(
+                        new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
+                        new ArrayList<>(eventsFromOneDay));
                 specificationsSectionAdapter.addSection(
-                        new HomeSectionAdapter(convertDateToString(
-                                new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
-                                new ArrayList<>(eventsFromOneDay)));
+                        section);
+                section.setOnItemClickListener(item -> onItemClickListenerr.onClick(item));
                 eventsFromOneDay.clear();
                 eventsFromOneDay.add(eventWeekList.get(j));
             }
@@ -79,17 +81,30 @@ public class Pager extends PagerAdapter {
             }
         }
         if (!flag) {
+            HomeSectionAdapter section = new HomeSectionAdapter(convertDateToString(
+                    new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
+                    new ArrayList<>(eventsFromOneDay));
             specificationsSectionAdapter.addSection(
-                    new HomeSectionAdapter(convertDateToString(
-                            new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
-                            new ArrayList<>(eventsFromOneDay)));
+                    section);
+            section.setOnItemClickListener(item -> onItemClickListenerr.onClick(item));
+
         }
 //        }
         specificationsSectionAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
         recyclerView.setAdapter(specificationsSectionAdapter);
         container.addView(recyclerView);
+
+
         return recyclerView;
+    }
+
+    public void setOnItemClickListener(ItemClickListener listener) {
+        this.onItemClickListenerr = listener;
+    }
+
+    interface ItemClickListener {
+        void onClick(Event event);
     }
 
     private String convertDateToString(Date date) {

@@ -6,6 +6,7 @@
 
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+    <color name="red">#a90000</color>
 
     <color name="bottom_navigation_color">#2d3e50</color>
 
@@ -13,4 +14,5 @@
     <color name="end_event_color">#a8a8a8</color>
     <color name="teacher_name_color">#808080</color>
     <color name="schedule_background">#efeef4</color>
+    <color name="search_background">#eeedf3</color>
 </resources>

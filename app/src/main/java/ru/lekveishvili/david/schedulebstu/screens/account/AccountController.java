@@ -4,7 +4,9 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bluelinelabs.conductor.RouterTransaction;
 
@@ -18,14 +20,23 @@ import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
 import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.screens.auth.AuthorizationController;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
-import ru.lekveishvili.david.schedulebstu.screens.base.ParentController;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 
 public class AccountController extends BaseController {
+    private String userType;
+    private String userName;
     @BindView(R.id.account_toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.account_out)
-    TextView out;
+    Button btnOut;
+    @BindView(R.id.account_create_event)
+    Button btnCreateEvent;
+    @BindView(R.id.account_user_name)
+    TextView tvUserName;
+    @BindView(R.id.account_user_group)
+    TextView tvUserGroup;
+    @BindView(R.id.account_user_type)
+    TextView tvuserType;
 
     @Inject
     BottomNavigationService bottomNavigationService;
@@ -42,16 +53,38 @@ public class AccountController extends BaseController {
         super.onViewBound(view);
         ScheduleBSTUApplication.getAppComponent(view.getContext())
                 .inject(this);
+        bottomNavigationService.show();
         realm = Realm.getDefaultInstance();
+
+        RealmResults<Authorization> all = realm.where(Authorization.class).findAll();
+        userType = all.get(0).getTypeUser();
+        userName = all.get(0).getFullName();
+        tvUserName.setText(userName);
+        if (userType.equals("Преподаватель")) {
+            tvuserType.setText("Преподаватель");
+            btnCreateEvent.setVisibility(View.VISIBLE);
+        }
+        if (userType.equals("Студент")) {
+            tvuserType.setText("Студент");
+        }
+        btnCreateEvent.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(),
+                    "You Преподаватель",
+                    Toast.LENGTH_SHORT).show();
+        });
+        if (all.get(0).getGroups().size() != 0) {
+            tvUserGroup.setText(all.get(0).getGroups().get(0).getName());
+        }
+
         configureToolbar();
-        out.setOnClickListener(v -> {
-            bottomNavigationService.hide();
+        btnOut.setOnClickListener(v -> {
             realm.beginTransaction();
             realm.where(Authorization.class)
                     .findAll()
                     .deleteAllFromRealm();
             realm.commitTransaction();
-            getRouter().setRoot(RouterTransaction.with(new AuthorizationController()));
+            getRouter().setRoot(RouterTransaction.with(new AuthorizationController(true)));
+            getRouter().popController(this);
         });
     }
 

@@ -258,7 +258,7 @@ public class ParentController extends BaseController {
             GetSubjectUseCase getSubjectUseCase = new GetSubjectUseCase(apiService, sessionService.getToken());
             GetTeacherUseCase getTeacherUseCase = new GetTeacherUseCase(apiService, sessionService.getToken());
             GetEventTypeUseCase getEventTypeUseCase = new GetEventTypeUseCase(apiService, sessionService.getToken());
-            GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(apiService, sessionService.getToken());
+//            GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(apiService, sessionService.getToken());
 
             getGroupUseCase.execute()
                     .subscribeOn(Schedulers.io())
@@ -290,12 +290,12 @@ public class ParentController extends BaseController {
                     .subscribe(
                             this::setEventTypes
                     );
-            getEventWeekUseCase.execute()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            this::setEventsWeek
-                    );
+//            getEventWeekUseCase.executeBasicGroup()
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(
+//                            this::setEventsWeek
+//                    );
         }
 
     }
@@ -357,12 +357,14 @@ public class ParentController extends BaseController {
     private void setTeachers(List<Teacher> teachers) {
         realm.beginTransaction();
         RealmResults<Teacher> requestTeacher = realm.where(Teacher.class).findAll();
+//        requestTeacher.deleteAllFromRealm();
+//        for (int i = 0; i < teachers.size(); i++) {
+//            realm.copyToRealm(teachers.get(i));
+//        }
         List<Teacher> tmpTeacherList = new ArrayList<>();
-        Log.d("befor", requestTeacher.size() + "/" + teachers.size());
         for (int i = 0; i < requestTeacher.size(); i++) {
             tmpTeacherList.add(requestTeacher.get(i));
         }
-        Log.d("compil", tmpTeacherList.size() + " ");
         for (int i = 0; i < teachers.size(); i++) {
             if (containsTeacher(tmpTeacherList, teachers.get(i))) {
                 tmpTeacherList = removeItemFromListTeacher(tmpTeacherList, teachers.get(i));
@@ -374,6 +376,8 @@ public class ParentController extends BaseController {
             tmpTeacherList.get(i).deleteFromRealm();
         }
         realm.commitTransaction();
+
+
     }
 
     private boolean containsTeacher(List<Teacher> list, Teacher item) {
@@ -479,6 +483,10 @@ public class ParentController extends BaseController {
     private void setGroups(List<Group> groups) {
         realm.beginTransaction();
         RealmResults<Group> requestGroup = realm.where(Group.class).findAll();
+//        requestGroup.deleteAllFromRealm();
+//        for (int i = 0; i < groups.size(); i++) {
+//            realm.copyToRealm(groups.get(i));
+//        }
         List<Group> tmpGroupList = new ArrayList<>();
         for (int i = 0; i < requestGroup.size(); i++) {
             tmpGroupList.add(requestGroup.get(i));
@@ -498,7 +506,7 @@ public class ParentController extends BaseController {
 
     private boolean containsGroup(List<Group> list, Group item) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getId().equals(item.getId())) {
+            if (list.get(i).getName().equals(item.getName())) {
                 return true;
             }
         }

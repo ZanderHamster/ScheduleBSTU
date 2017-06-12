@@ -26,10 +26,9 @@ public class EventWeekModelMapper {
         this.mainApiService = mainApiService;
     }
 
-    public RealmList<Event> transform(EventWeekResponse eventWeekResponse) {
+    public RealmList<Event> transformOther(EventWeekResponse eventWeekResponse) {
         RealmList<Event> result = new RealmList<>();
         for (int i = 0; i < eventWeekResponse.timetable.size(); i++) {
-            // Other
             for (int j = 0; j < eventWeekResponse.timetable.get(i).other.size(); j++) {
                 EventWeekResponse.Other other = eventWeekResponse.timetable.get(i).other.get(j);
                 // Дата и время события
@@ -94,138 +93,149 @@ public class EventWeekModelMapper {
                         .withSubject(subject)
                         .build());
             }
-            // Basic
-            for (int j = 0; j < eventWeekResponse.timetable.get(i).basic.size(); j++) {
-                boolean nextWeek = false;
-                EventWeekResponse.Basic basic = eventWeekResponse.timetable.get(i).basic.get(j);
-                //Дата события события
-                Integer dayOfTheWeek = basic.date.day + 1;
-                String strStartPeriod = basic.date.academicPeriod.date.start; // 2017-09-01
-                String strEndPeriod = basic.date.academicPeriod.date.end; // 2017-12-29
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+        }
+        return result;
+    }
 
-                Date dateStartPeriod = new Date();
-                Date dateEndPeriod = new Date();
-                try {
-                    dateStartPeriod = dateFormat.parse(strStartPeriod);
-                    dateEndPeriod = dateFormat.parse(strEndPeriod);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                // Нахожу первую дату в семестре для текущей пары
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(dateStartPeriod);
-                int tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
-                if (tmpDayOfTheWeek == 0) {
-                    tmpDayOfTheWeek = 7;
-                }
-                while (!(dayOfTheWeek == tmpDayOfTheWeek)) {
-                    cal.add(Calendar.DATE, 1);
-                    if (tmpDayOfTheWeek == 7) {
-                        nextWeek = true;
+
+    public RealmList<Event> transformBasic(EventWeekResponse eventWeekResponse) {
+        RealmList<Event> result = new RealmList<>();
+        if (eventWeekResponse.timetable != null) {
+
+            for (int i = 0; i < eventWeekResponse.timetable.size(); i++) {
+                // Basic
+                for (int j = 0; j < eventWeekResponse.timetable.get(i).basic.size(); j++) {
+                    boolean nextWeek = false;
+                    EventWeekResponse.Basic basic = eventWeekResponse.timetable.get(i).basic.get(j);
+                    //Дата события события
+                    Integer dayOfTheWeek = basic.date.day + 1;
+                    String strStartPeriod = basic.date.academicPeriod.date.start; // 2017-09-01
+                    String strEndPeriod = basic.date.academicPeriod.date.end; // 2017-12-29
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+
+                    Date dateStartPeriod = new Date();
+                    Date dateEndPeriod = new Date();
+                    try {
+                        dateStartPeriod = dateFormat.parse(strStartPeriod);
+                        dateEndPeriod = dateFormat.parse(strEndPeriod);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
-                    tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
+                    // Нахожу первую дату в семестре для текущей пары
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(dateStartPeriod);
+                    int tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
                     if (tmpDayOfTheWeek == 0) {
                         tmpDayOfTheWeek = 7;
                     }
-                }
-                if ((basic.date.drop == 1) && nextWeek || (basic.date.drop == 2) && !nextWeek) {
-                    cal.add(Calendar.DATE, 0);
-                }
-                if ((basic.date.drop == 2) && nextWeek || (basic.date.drop == 1) && !nextWeek) {
-                    cal.add(Calendar.DATE, 7);
-                }
-                // Тип события
-                EventType eventType = EventType.newBuilder()
-                        .withName(basic.eventType.name)
-                        .withId(basic.eventType.id)
-                        .build();
-                // Группы принимающие участие в событии
-                RealmList<Group> groups = new RealmList<>();
-                for (int k = 0; k < basic.groups.size(); k++) {
-                    groups.add(Group.newBuilder()
-                            .withId(basic.groups.get(k).id)
-                            .withName(basic.groups.get(k).name)
-                            .build());
-                }
-                // Аудитория
-                Room room = Room.newBuilder()
-                        .withId(basic.lectureHall.id)
-                        .withName(basic.lectureHall.name)
-                        .build();
-                // Преподаватели принимающие участие в событии
-                RealmList<Teacher> teachers = new RealmList<>();
-                for (int k = 0; k < basic.lecturer.size(); k++) {
-                    String[] parts = basic.lecturer.get(k).name.split(" ");
-                    // TODO убрать этот костыль
-                    if (parts.length == 2) {
-                        teachers.add(Teacher.newBuilder()
-                                .withFirstName(parts[0])
-                                .withSecondName(parts[1])
-                                .withFullName(basic.lecturer.get(k).name)
-                                .withId(basic.lecturer.get(k).id)
-                                .build());
-                    } else {
-                        teachers.add(Teacher.newBuilder()
-                                .withFirstName(parts[0])
-                                .withSecondName(parts[1])
-                                .withThirdName(parts[2])
-                                .withFullName(basic.lecturer.get(k).name)
-                                .withId(basic.lecturer.get(k).id)
-                                .build());
+                    while (!(dayOfTheWeek == tmpDayOfTheWeek)) {
+                        cal.add(Calendar.DATE, 1);
+                        if (tmpDayOfTheWeek == 7) {
+                            nextWeek = true;
+                        }
+                        tmpDayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
+                        if (tmpDayOfTheWeek == 0) {
+                            tmpDayOfTheWeek = 7;
+                        }
                     }
-                }
-                // Предмет
-                Subject subject = Subject.newBuilder()
-                        .withName(basic.subject.name)
-                        .withId(basic.subject.id)
-                        .build();
-                //Время события события
-                String startEventTime = basic.classTime.time.start; //13:20
-                String[] parts1 = startEventTime.split(":");
-                Calendar startCalendar = Calendar.getInstance();
-                startCalendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
-                startCalendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
-                startCalendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
-                startCalendar.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parts1[0]));
-                startCalendar.set(Calendar.MINUTE, Integer.valueOf(parts1[1]));
-                startCalendar.set(Calendar.SECOND, 0);
-                Date dateStart = startCalendar.getTime();
-
-                String endEventTime = basic.classTime.time.end; //15:05
-                String[] parts2 = endEventTime.split(":");
-                Calendar endCalendar = Calendar.getInstance();
-                endCalendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
-                endCalendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
-                endCalendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
-                endCalendar.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parts2[0]));
-                endCalendar.set(Calendar.MINUTE, Integer.valueOf(parts2[1]));
-                endCalendar.set(Calendar.SECOND, 0);
-                Date dateEnd = endCalendar.getTime();
-
-                // от calTime с каким то шагом до dateEndPeriod
-                while (cal.getTime().getTime() <= dateEndPeriod.getTime()) {
-                    result.add(Event.newBuilder()
-                            .withId(basic.id)
-                            .withStartEvent(dateStart)
-                            .withEndEvent(dateEnd)
-                            .withEventType(eventType)
-                            .withGroups(groups)
-                            .withRoom(room)
-                            .withTeachers(teachers)
-                            .withSubject(subject)
-                            .build());
-                    if (basic.date.drop == 1 || basic.date.drop == 2) {
-                        cal.add(Calendar.DATE, 14);
-                        startCalendar.add(Calendar.DATE, 14);
-                        endCalendar.add(Calendar.DATE, 14);
-                    } else {
+                    if ((basic.date.drop == 1) && nextWeek || (basic.date.drop == 2) && !nextWeek) {
+                        cal.add(Calendar.DATE, 0);
+                    }
+                    if ((basic.date.drop == 2) && nextWeek || (basic.date.drop == 1) && !nextWeek) {
                         cal.add(Calendar.DATE, 7);
-                        startCalendar.add(Calendar.DATE, 7);
-                        endCalendar.add(Calendar.DATE, 7);
                     }
-                    dateStart = startCalendar.getTime();
-                    dateEnd = endCalendar.getTime();
+                    // Тип события
+                    EventType eventType = EventType.newBuilder()
+                            .withName(basic.eventType.name)
+                            .withId(basic.eventType.id)
+                            .build();
+                    // Группы принимающие участие в событии
+                    RealmList<Group> groups = new RealmList<>();
+                    for (int k = 0; k < basic.groups.size(); k++) {
+                        groups.add(Group.newBuilder()
+                                .withId(basic.groups.get(k).id)
+                                .withName(basic.groups.get(k).name)
+                                .build());
+                    }
+                    // Аудитория
+                    Room room = Room.newBuilder()
+                            .withId(basic.lectureHall.id)
+                            .withName(basic.lectureHall.name)
+                            .build();
+                    // Преподаватели принимающие участие в событии
+                    RealmList<Teacher> teachers = new RealmList<>();
+                    for (int k = 0; k < basic.lecturer.size(); k++) {
+                        String[] parts = basic.lecturer.get(k).name.split(" ");
+                        // TODO убрать этот костыль
+                        if (parts.length == 2) {
+                            teachers.add(Teacher.newBuilder()
+                                    .withFirstName(parts[0])
+                                    .withSecondName(parts[1])
+                                    .withFullName(basic.lecturer.get(k).name)
+                                    .withId(basic.lecturer.get(k).id)
+                                    .build());
+                        } else {
+                            teachers.add(Teacher.newBuilder()
+                                    .withFirstName(parts[0])
+                                    .withSecondName(parts[1])
+                                    .withThirdName(parts[2])
+                                    .withFullName(basic.lecturer.get(k).name)
+                                    .withId(basic.lecturer.get(k).id)
+                                    .build());
+                        }
+                    }
+                    // Предмет
+                    Subject subject = Subject.newBuilder()
+                            .withName(basic.subject.name)
+                            .withId(basic.subject.id)
+                            .build();
+                    //Время события события
+                    String startEventTime = basic.classTime.time.start; //13:20
+                    String[] parts1 = startEventTime.split(":");
+                    Calendar startCalendar = Calendar.getInstance();
+                    startCalendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+                    startCalendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+                    startCalendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+                    startCalendar.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parts1[0]));
+                    startCalendar.set(Calendar.MINUTE, Integer.valueOf(parts1[1]));
+                    startCalendar.set(Calendar.SECOND, 0);
+                    Date dateStart = startCalendar.getTime();
+
+                    String endEventTime = basic.classTime.time.end; //15:05
+                    String[] parts2 = endEventTime.split(":");
+                    Calendar endCalendar = Calendar.getInstance();
+                    endCalendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+                    endCalendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+                    endCalendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+                    endCalendar.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parts2[0]));
+                    endCalendar.set(Calendar.MINUTE, Integer.valueOf(parts2[1]));
+                    endCalendar.set(Calendar.SECOND, 0);
+                    Date dateEnd = endCalendar.getTime();
+
+                    // от calTime с каким то шагом до dateEndPeriod
+                    while (cal.getTime().getTime() <= dateEndPeriod.getTime()) {
+                        result.add(Event.newBuilder()
+                                .withId(basic.id)
+                                .withStartEvent(dateStart)
+                                .withEndEvent(dateEnd)
+                                .withEventType(eventType)
+                                .withGroups(groups)
+                                .withRoom(room)
+                                .withTeachers(teachers)
+                                .withSubject(subject)
+                                .build());
+                        if (basic.date.drop == 1 || basic.date.drop == 2) {
+                            cal.add(Calendar.DATE, 14);
+                            startCalendar.add(Calendar.DATE, 14);
+                            endCalendar.add(Calendar.DATE, 14);
+                        } else {
+                            cal.add(Calendar.DATE, 7);
+                            startCalendar.add(Calendar.DATE, 7);
+                            endCalendar.add(Calendar.DATE, 7);
+                        }
+                        dateStart = startCalendar.getTime();
+                        dateEnd = endCalendar.getTime();
+                    }
                 }
             }
         }

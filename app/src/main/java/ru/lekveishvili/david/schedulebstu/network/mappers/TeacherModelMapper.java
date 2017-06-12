@@ -23,13 +23,23 @@ public class TeacherModelMapper {
                 TeacherResponse.Lecturer teacher = teacherResponse.data.get(i);
                 String fullName = teacher.name;
                 String[] parts = fullName.split(" ");
-                result.add(Teacher.newBuilder()
-                        .withFirstName(parts[0])
-                        .withSecondName(parts[1])
-                        .withThirdName(parts[2])
-                        .withId(teacher.id)
-                        .withFullName(fullName)
-                        .build());
+                //TODO убрать этот костыль 2
+                if (parts.length == 2) {
+                    result.add(Teacher.newBuilder()
+                            .withFirstName(parts[0])
+                            .withSecondName(parts[1])
+                            .withFullName(fullName)
+                            .withId(teacher.id)
+                            .build());
+                } else {
+                    result.add(Teacher.newBuilder()
+                            .withFirstName(parts[0])
+                            .withSecondName(parts[1])
+                            .withThirdName(parts[2])
+                            .withFullName(fullName)
+                            .withId(teacher.id)
+                            .build());
+                }
             }
         }
         return result;

@@ -4,4 +4,5 @@
     <string name="bottom_menu_home">Главная</string>
     <string name="bottom_menu_search">Поиск</string>
     <string name="bottom_menu_account">Личный кабинет</string>
+    <string name="advanced">Детали</string>
 </resources>

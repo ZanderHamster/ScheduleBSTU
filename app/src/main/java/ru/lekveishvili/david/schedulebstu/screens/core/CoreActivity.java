@@ -44,7 +44,7 @@ public class CoreActivity extends BaseActivity {
         if (isAuth.size() != 0) {
             coreRouter.setRoot(RouterTransaction.with(new ParentController(ParentController.Tag.HOME)));
         } else {
-            coreRouter.setRoot(RouterTransaction.with(new AuthorizationController()));
+            coreRouter.setRoot(RouterTransaction.with(new AuthorizationController(false)));
         }
     }
 
