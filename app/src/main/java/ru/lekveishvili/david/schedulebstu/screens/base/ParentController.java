@@ -462,7 +462,7 @@ public class ParentController extends BaseController {
 
     private boolean containsRoom(List<Room> list, Room item) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getId().equals(item.getId())) {
+            if (list.get(i).getName().equals(item.getName())) {
                 return true;
             }
         }
