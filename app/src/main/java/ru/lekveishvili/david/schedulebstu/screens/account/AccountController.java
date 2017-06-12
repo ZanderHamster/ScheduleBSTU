@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bluelinelabs.conductor.RouterTransaction;
 
@@ -20,11 +19,10 @@ import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
 import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.screens.auth.AuthorizationController;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
+import ru.lekveishvili.david.schedulebstu.screens.create_event.CreateNewEventController;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 
 public class AccountController extends BaseController {
-    private String userType;
-    private String userName;
     @BindView(R.id.account_toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.account_out)
@@ -36,7 +34,7 @@ public class AccountController extends BaseController {
     @BindView(R.id.account_user_group)
     TextView tvUserGroup;
     @BindView(R.id.account_user_type)
-    TextView tvuserType;
+    TextView tvUserType;
 
     @Inject
     BottomNavigationService bottomNavigationService;
@@ -57,21 +55,16 @@ public class AccountController extends BaseController {
         realm = Realm.getDefaultInstance();
 
         RealmResults<Authorization> all = realm.where(Authorization.class).findAll();
-        userType = all.get(0).getTypeUser();
-        userName = all.get(0).getFullName();
+        String userType = all.get(0).getTypeUser();
+        String userName = all.get(0).getFullName();
         tvUserName.setText(userName);
         if (userType.equals("Преподаватель")) {
-            tvuserType.setText("Преподаватель");
+            tvUserType.setText("Преподаватель");
             btnCreateEvent.setVisibility(View.VISIBLE);
         }
         if (userType.equals("Студент")) {
-            tvuserType.setText("Студент");
+            tvUserType.setText("Студент");
         }
-        btnCreateEvent.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(),
-                    "You Преподаватель",
-                    Toast.LENGTH_SHORT).show();
-        });
         if (all.get(0).getGroups().size() != 0) {
             tvUserGroup.setText(all.get(0).getGroups().get(0).getName());
         }
@@ -86,6 +79,8 @@ public class AccountController extends BaseController {
             getRouter().setRoot(RouterTransaction.with(new AuthorizationController(true)));
             getRouter().popController(this);
         });
+        btnCreateEvent.setOnClickListener(v -> getRouter().pushController(
+                RouterTransaction.with(new CreateNewEventController())));
     }
 
     private void configureToolbar() {

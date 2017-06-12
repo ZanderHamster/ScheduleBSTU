@@ -382,7 +382,7 @@ public class ParentController extends BaseController {
 
     private boolean containsTeacher(List<Teacher> list, Teacher item) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getId().equals(item.getId())) {
+            if (list.get(i).getFullName().equals(item.getFullName())) {
                 return true;
             }
         }

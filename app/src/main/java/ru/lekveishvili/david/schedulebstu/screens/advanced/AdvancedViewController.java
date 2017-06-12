@@ -32,8 +32,6 @@ public class AdvancedViewController extends BaseController {
     TextView toolbarTitle;
     @BindView(R.id.advanced_toolbar_back_button)
     ImageView btnBack;
-    @BindView(R.id.advanced_toolbar)
-    Toolbar toolbar;
 
     @BindView(R.id.advanced_subject)
     TextView tvSubject;
