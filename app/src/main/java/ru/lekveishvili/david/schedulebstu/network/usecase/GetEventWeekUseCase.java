@@ -12,8 +12,6 @@ public class GetEventWeekUseCase {
     private String token;
     private String date;
     private String groupOrLecture;
-//    String date = "2017-09-11";
-//    String groupOrLecture = "13-ИВТ1";
 
 
     public GetEventWeekUseCase(MainApiService mainApiService, String token, String date, String groupOrLecture) {

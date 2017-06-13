@@ -1,7 +1,6 @@
 package ru.lekveishvili.david.schedulebstu.screens.advanced;
 
 import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,8 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
@@ -23,11 +24,16 @@ import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
 import ru.lekveishvili.david.schedulebstu.SessionService;
 import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.models.Event;
+import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
+import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetDeleteEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 
 public class AdvancedViewController extends BaseController {
     private Event advancedEvent;
     private Realm realm;
+
+    private MainApiService apiService = RetrofitClient.getMainApiService();
     @BindView(R.id.advanced_toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.advanced_toolbar_back_button)
@@ -103,11 +109,23 @@ public class AdvancedViewController extends BaseController {
             btnEdit.setVisibility(View.VISIBLE);
             btnDelete.setOnClickListener(v -> {
                 //TODO удаление
+//                GetDeleteEventDataUseCase getDeleteEventDataUseCase =
+//                        new GetDeleteEventDataUseCase(
+//                                apiService,
+//                                sessionService.getToken());
+//
+//                getDeleteEventDataUseCase.execute()
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(this::deleteEvent);
             });
             btnEdit.setOnClickListener(v -> {
                 //TODO редактирование
             });
         }
+
+    }
+    private void deleteEvent(boolean deletion){
 
     }
 

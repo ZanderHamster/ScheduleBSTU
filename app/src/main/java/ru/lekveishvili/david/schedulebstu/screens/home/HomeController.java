@@ -76,6 +76,10 @@ public class HomeController extends BaseController {
             if (month < 10) {
                 strMonth = 0 + strMonth;
             }
+            ////
+            //TODO
+            strMonth = "09";
+            ////
             int day = instance.get(Calendar.DAY_OF_MONTH);
             if (all.get(0).getTypeUser().equals("Гость")) {
                 btnGoToAuth.setVisibility(View.VISIBLE);
@@ -91,10 +95,6 @@ public class HomeController extends BaseController {
 
             }
             if (all.get(0).getTypeUser().equals("Студент")) {
-                ////
-                //TODO
-                strMonth = "09";
-                ////
                 String strDate = year + "-" + strMonth + "-" + day;
                 String strGroup = all.get(0).getGroups().get(0).getName();
 
@@ -109,10 +109,6 @@ public class HomeController extends BaseController {
                         .subscribe(this::setModel);
             }
             if (all.get(0).getTypeUser().equals("Преподаватель")) {
-                ////
-                //TODO
-                strMonth = "09";
-                ////
                 String strDate = year + "-" + strMonth + "-" + day;
                 String strLecture = all.get(0).getFullName();
 
