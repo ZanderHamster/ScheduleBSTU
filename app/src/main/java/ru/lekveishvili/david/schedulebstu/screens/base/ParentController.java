@@ -32,6 +32,7 @@ import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
 import ru.lekveishvili.david.schedulebstu.SessionService;
+import ru.lekveishvili.david.schedulebstu.models.ClassTime;
 import ru.lekveishvili.david.schedulebstu.models.Event;
 import ru.lekveishvili.david.schedulebstu.models.EventType;
 import ru.lekveishvili.david.schedulebstu.models.Group;
@@ -40,15 +41,12 @@ import ru.lekveishvili.david.schedulebstu.models.Subject;
 import ru.lekveishvili.david.schedulebstu.models.Teacher;
 import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetClassTimeUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetEventTypeUseCase;
-import ru.lekveishvili.david.schedulebstu.network.usecase.GetEventWeekUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetGroupUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetRoomUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetSubjectUseCase;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetTeacherUseCase;
-import ru.lekveishvili.david.schedulebstu.screens.account.AccountController;
-import ru.lekveishvili.david.schedulebstu.screens.home.HomeController;
-import ru.lekveishvili.david.schedulebstu.screens.search.SearchController;
 import ru.lekveishvili.david.schedulebstu.service.BottomNavigationService;
 import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
 import ru.lekveishvili.david.schedulebstu.util.Utils;
@@ -258,6 +256,7 @@ public class ParentController extends BaseController {
             GetSubjectUseCase getSubjectUseCase = new GetSubjectUseCase(apiService, sessionService.getToken());
             GetTeacherUseCase getTeacherUseCase = new GetTeacherUseCase(apiService, sessionService.getToken());
             GetEventTypeUseCase getEventTypeUseCase = new GetEventTypeUseCase(apiService, sessionService.getToken());
+            GetClassTimeUseCase getClassTimeUseCase = new GetClassTimeUseCase(apiService, sessionService.getToken());
 //            GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(apiService, sessionService.getToken());
 
             getGroupUseCase.execute()
@@ -290,6 +289,12 @@ public class ParentController extends BaseController {
                     .subscribe(
                             this::setEventTypes
                     );
+            getClassTimeUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::setClassTime
+                    );
 //            getEventWeekUseCase.executeBasicGroup()
 //                    .subscribeOn(Schedulers.io())
 //                    .observeOn(AndroidSchedulers.mainThread())
@@ -312,6 +317,45 @@ public class ParentController extends BaseController {
         realm.close();
     }
 
+    ///----------------///
+    private void setClassTime(List<ClassTime> classTimes) {
+        realm.beginTransaction();
+        RealmResults<ClassTime> requestClassTime = realm.where(ClassTime.class).findAll();
+        List<ClassTime> tmpClassTimeList = new ArrayList<>();
+        for (int i = 0; i < requestClassTime.size(); i++) {
+            tmpClassTimeList.add(requestClassTime.get(i));
+        }
+        for (int i = 0; i < classTimes.size(); i++) {
+            if (containsClassTime(tmpClassTimeList, classTimes.get(i))) {
+                tmpClassTimeList = removeItemFromListClassTime(tmpClassTimeList, classTimes.get(i));
+            } else {
+                realm.copyToRealm(classTimes.get(i));
+            }
+        }
+        for (int i = 0; i < tmpClassTimeList.size(); i++) {
+            tmpClassTimeList.get(i).deleteFromRealm();
+        }
+        realm.commitTransaction();
+    }
+
+    private boolean containsClassTime(List<ClassTime> list, ClassTime item) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(item.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<ClassTime> removeItemFromListClassTime(List<ClassTime> list, ClassTime item) {
+        List<ClassTime> tmpList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).getStart().equals(item.getStart())) {
+                tmpList.add(list.get(i));
+            }
+        }
+        return tmpList;
+    }
 
     ///----------------///
     private void setEventTypes(List<EventType> eventTypes) {

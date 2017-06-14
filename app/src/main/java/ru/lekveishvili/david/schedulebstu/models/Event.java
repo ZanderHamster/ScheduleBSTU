@@ -15,6 +15,7 @@ public class Event extends RealmObject {
     private RealmList<Teacher> teachers;
     private Subject subject;
     private RealmList<Group> groups;
+    private String timeId;
 
     public Event() {
     }
@@ -91,6 +92,10 @@ public class Event extends RealmObject {
         return groups;
     }
 
+    public String getTimeId() {
+        return timeId;
+    }
+
     public Event(final Builder builder) {
         this.id = builder.id;
         this.startEvent = builder.startEvent;
@@ -100,6 +105,7 @@ public class Event extends RealmObject {
         this.teachers = builder.teachers;
         this.subject = builder.subject;
         this.groups = builder.groups;
+        this.timeId = builder.timeId;
     }
 
     public static final class Builder {
@@ -111,6 +117,7 @@ public class Event extends RealmObject {
         private RealmList<Teacher> teachers;
         private Subject subject;
         private RealmList<Group> groups;
+        private String timeId;
 
         private Builder() {
         }
@@ -124,10 +131,15 @@ public class Event extends RealmObject {
             this.teachers = copy.teachers;
             this.subject = copy.subject;
             this.groups = copy.groups;
+            this.timeId = copy.timeId;
         }
 
         public Builder withId(final String id) {
             this.id = id;
+            return this;
+        }
+        public Builder withTimeId(final String timeId) {
+            this.timeId = timeId;
             return this;
         }
 

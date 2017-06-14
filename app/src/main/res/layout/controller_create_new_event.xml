@@ -144,6 +144,31 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/create_event_start_event"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#d6d6d6"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/spinner_select_start_event_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:src="@drawable/ic_cancel_black_24dp"
+                android:tint="#b1b1b1"
+                android:visibility="gone" />
+
+            <Spinner
+                android:id="@+id/spinner_select_start_event"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp" />
+
+        </LinearLayout>
+
         <Button
             android:id="@+id/create_event"
             android:layout_width="wrap_content"

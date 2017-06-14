@@ -4,17 +4,28 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class EventTypesResponse {
+public class ClassTimeResponse {
 
     @SerializedName("message")
     public String message;
     @SerializedName("data")
-    public List<EventType> data = null;
+    public List<Datum> data = null;
 
-    public class EventType {
+    public class Time {
+
+        @SerializedName("start")
+        public String start;
+        @SerializedName("end")
+        public String end;
+
+    }
+
+    public class Datum {
 
         @SerializedName("name")
         public String name;
+        @SerializedName("time")
+        public Time time;
         @SerializedName("id")
         public String id;
 

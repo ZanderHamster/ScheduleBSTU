@@ -10,6 +10,7 @@ import ru.lekveishvili.david.schedulebstu.network.models.AuthRequest;
 import ru.lekveishvili.david.schedulebstu.network.models.AuthResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.CancelEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.models.CancelEventResponse;
+import ru.lekveishvili.david.schedulebstu.network.models.ClassTimeResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventTypesResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventWeekResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.GroupResponse;
@@ -29,6 +30,9 @@ public interface MainApiService {
 
     @GET("group/count/all")
     Observable<GroupResponse> getGroups(@Header("X-Auth-Token") String token);
+
+    @GET("classTime/count/all")
+    Observable<ClassTimeResponse> getClassTime(@Header("X-Auth-Token") String token);
 
     @GET("lectureHall/count/all")
     Observable<RoomResponse> getRooms(@Header("X-Auth-Token") String token);
