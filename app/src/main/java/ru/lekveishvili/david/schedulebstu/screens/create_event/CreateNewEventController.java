@@ -1,7 +1,10 @@
 package ru.lekveishvili.david.schedulebstu.screens.create_event;
 
 
+import android.app.DatePickerDialog;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,20 +12,30 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import ru.lekveishvili.david.schedulebstu.R;
+import ru.lekveishvili.david.schedulebstu.SessionService;
+import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.models.ClassTime;
 import ru.lekveishvili.david.schedulebstu.models.Event;
 import ru.lekveishvili.david.schedulebstu.models.EventType;
@@ -30,6 +43,10 @@ import ru.lekveishvili.david.schedulebstu.models.Group;
 import ru.lekveishvili.david.schedulebstu.models.Room;
 import ru.lekveishvili.david.schedulebstu.models.Subject;
 import ru.lekveishvili.david.schedulebstu.models.Teacher;
+import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
+import ru.lekveishvili.david.schedulebstu.network.models.CreateEventRequest;
+import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
+import ru.lekveishvili.david.schedulebstu.network.usecase.GetCreateEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 import ru.lekveishvili.david.schedulebstu.screens.search.adapters.NothingSelectedSpinnerAdapter;
 
@@ -62,6 +79,15 @@ public class CreateNewEventController extends BaseController {
     @BindView(R.id.spinner_select_start_event_reset)
     ImageView resetStartEvent;
 
+    @BindView(R.id.create_event_date_hint)
+    LinearLayout layoutDate;
+    @BindView(R.id.create_event_date_hint_image)
+    ImageView hintImageDate;
+    @BindView(R.id.create_event_date_hint_text)
+    TextView tvDate;
+    @BindView(R.id.button_date_event_reset)
+    ImageView resetDate;
+
     @BindView(R.id.create_event)
     Button btnCreateEvent;
 
@@ -69,6 +95,7 @@ public class CreateNewEventController extends BaseController {
     @Override
     protected void onViewBound(@NonNull View view) {
         super.onViewBound(view);
+
         realm = Realm.getDefaultInstance();
         configureToolbar();
 
@@ -77,22 +104,85 @@ public class CreateNewEventController extends BaseController {
         configureSpinnerRoom();
         configureSpinnerEventType();
         configureSpinnerStartEvent();
+        configureDate();
+
         btnCreateEvent.setOnClickListener(v -> {
-            Event build = Event.newBuilder(newEvent).build();
-            int size1 = build.getGroups().size();
-            List<Group> groups = newEvent.getGroups();
-            List<Teacher> teachers = newEvent.getTeachers();
-            String name = newEvent.getEventType().getName();
-            String id = newEvent.getEventType().getId();
-            String name1 = newEvent.getRoom().getName();
-            String id1 = newEvent.getRoom().getId();
-            String id2 = newEvent.getSubject().getId();
-            String name2 = newEvent.getSubject().getName();
+            MainApiService apiService = RetrofitClient.getMainApiService();
+
+            String teacherName = "";
+            String token = "";
+            RealmResults<Authorization> accounts = realm.where(Authorization.class).findAll();
+            if (accounts.size() != 0) {
+                teacherName = accounts.get(0).getFullName();
+                token = accounts.get(0).getToken();
+            }
+            RealmResults<Teacher> fullName = realm.where(Teacher.class)
+                    .equalTo("fullName", teacherName)
+                    .findAll();
+            List<String> lecturers = new ArrayList<>();
+            if (fullName.size() != 0) {
+                lecturers.add(fullName.get(0).getId());
+            }
+
             Date startEvent = newEvent.getStartEvent();
-            Date endEvent = newEvent.getEndEvent();
-            int size = groups.size();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+            String date = df.format(startEvent);
+
+
+            CreateEventRequest createEventRequest = new CreateEventRequest();
+            createEventRequest.subject = new CreateEventRequest.Subject();
+            createEventRequest.groups = new ArrayList<>();
+            createEventRequest.lectureHall = new CreateEventRequest.LectureHall();
+            createEventRequest.eventType = new CreateEventRequest.EventType();
+            createEventRequest.classTime = new CreateEventRequest.ClassTime();
+            createEventRequest.lecturer = new ArrayList<>();
+            createEventRequest.date = new CreateEventRequest.Date();
+
+
+            CreateEventRequest.Group group = new CreateEventRequest.Group();
+            group.id = newEvent.getGroups().get(0).getId();
+            CreateEventRequest.Lecturer lecturer = new CreateEventRequest.Lecturer();
+            lecturer.id = lecturers.get(0);
+
+            createEventRequest.subject.id = newEvent.getSubject().getId();
+            createEventRequest.groups.add(group);
+            createEventRequest.lectureHall.id = newEvent.getRoom().getId();
+            createEventRequest.eventType.id = newEvent.getEventType().getId();
+            createEventRequest.classTime.id = newEvent.getTimeId();
+            createEventRequest.lecturer.add(lecturer);
+            createEventRequest.date.date = date;
+
+
+            new GetCreateEventDataUseCase(apiService, token).execute(createEventRequest)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::createEventMessage,
+                            throwable -> Snackbar.make(btnCreateEvent, "Невозможно создать событие!",
+                                    Snackbar.LENGTH_SHORT).show()
+                    );
         });
 
+    }
+
+    private void createEventMessage(String msg) {
+            spinnerSubject.setSelection(0);
+            setVisibilityResetSubject(false);
+            spinnerGroup.setSelection(0);
+            setVisibilityResetGroup(false);
+            spinnerRoom.setSelection(0);
+            setVisibilityResetRoom(false);
+            spinnerEventType.setSelection(0);
+            setVisibilityResetEventType(false);
+            spinnerStartEvent.setSelection(0);
+            setVisibilityResetStartEvent(false);
+            tvDate.setTextColor(getResources().getColor(R.color.hint_color));
+            tvDate.setText("Выбрать дату");
+            setVisibilityResetDate(false);
+            newEvent = Event.newBuilder().build();
+
+        Snackbar.make(btnCreateEvent, msg,
+                Snackbar.LENGTH_SHORT).show();
     }
 
     private void configureSpinnerSubject() {
@@ -357,15 +447,13 @@ public class CreateNewEventController extends BaseController {
                     Calendar cal = Calendar.getInstance();
                     cal.set(Calendar.HOUR_OF_DAY, Integer.valueOf(splitStart[0]));
                     cal.set(Calendar.MINUTE, Integer.valueOf(splitStart[1]));
-                    cal.set(Calendar.SECOND,0);
-                    cal.getTime();
+                    cal.set(Calendar.SECOND, 0);
 
                     String[] splitEnd = strEnd.split(":");
                     Calendar calEnd = Calendar.getInstance();
                     calEnd.set(Calendar.HOUR_OF_DAY, Integer.valueOf(splitEnd[0]));
                     calEnd.set(Calendar.MINUTE, Integer.valueOf(splitEnd[1]));
-                    calEnd.set(Calendar.SECOND,0);
-                    calEnd.getTime();
+                    calEnd.set(Calendar.SECOND, 0);
 
                     newEvent = Event.newBuilder(newEvent)
                             .withStartEvent(cal.getTime())
@@ -394,6 +482,60 @@ public class CreateNewEventController extends BaseController {
         }
     }
 
+    private void configureDate() {
+        layoutDate.setOnClickListener(v -> {
+            Calendar myCalendar = Calendar.getInstance();
+            DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+                tvDate.setText(sdf.format(myCalendar.getTime()));
+                tvDate.setTextColor(getResources().getColor(R.color.black));
+                setVisibilityResetDate(true);
+
+                Calendar calStart = Calendar.getInstance();
+                if (newEvent.getStartEvent() != null) {
+                    calStart.setTime(newEvent.getStartEvent());
+                }
+                calStart.set(Calendar.YEAR, year);
+                calStart.set(Calendar.MONTH, monthOfYear);
+                calStart.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                Calendar calEnd = Calendar.getInstance();
+                if (newEvent.getEndEvent() != null) {
+                    calEnd.setTime(newEvent.getEndEvent());
+                }
+                calEnd.set(Calendar.YEAR, year);
+                calEnd.set(Calendar.MONTH, monthOfYear);
+                calEnd.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+
+                newEvent = Event.newBuilder(newEvent)
+                        .withStartEvent(calStart.getTime())
+                        .withEndEvent(calEnd.getTime())
+                        .build();
+            };
+            new DatePickerDialog(v.getContext(), date, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+        });
+        resetDate.setOnClickListener(v -> {
+            tvDate.setTextColor(getResources().getColor(R.color.hint_color));
+            tvDate.setText("Выбрать дату");
+            setVisibilityResetDate(false);
+        });
+    }
+
+    private void setVisibilityResetDate(boolean flag) {
+        if (flag) {
+            resetDate.setVisibility(View.VISIBLE);
+            hintImageDate.setVisibility(View.GONE);
+        } else {
+            resetDate.setVisibility(View.GONE);
+            hintImageDate.setVisibility(View.VISIBLE);
+        }
+    }
 
     private void configureToolbar() {
         btnBack.setOnClickListener(v -> getRouter().handleBack());

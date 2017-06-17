@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -25,6 +26,7 @@ import ru.lekveishvili.david.schedulebstu.SessionService;
 import ru.lekveishvili.david.schedulebstu.models.Authorization;
 import ru.lekveishvili.david.schedulebstu.models.Event;
 import ru.lekveishvili.david.schedulebstu.network.RetrofitClient;
+import ru.lekveishvili.david.schedulebstu.network.models.CancelEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetDeleteEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
@@ -109,15 +111,24 @@ public class AdvancedViewController extends BaseController {
             btnEdit.setVisibility(View.VISIBLE);
             btnDelete.setOnClickListener(v -> {
                 //TODO удаление
-//                GetDeleteEventDataUseCase getDeleteEventDataUseCase =
-//                        new GetDeleteEventDataUseCase(
-//                                apiService,
-//                                sessionService.getToken());
-//
-//                getDeleteEventDataUseCase.execute()
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .subscribe(this::deleteEvent);
+                String token = "";
+                RealmResults<Authorization> accounts = realm.where(Authorization.class).findAll();
+                if (accounts.size() != 0) {
+                    token = accounts.get(0).getToken();
+                }
+                Date startEvent = advancedEvent.getStartEvent();
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+
+                CancelEventRequest cancelEventRequest = new CancelEventRequest();
+                cancelEventRequest.id = advancedEvent.getId();
+                cancelEventRequest.date = df.format(startEvent);
+
+                new GetDeleteEventDataUseCase(apiService, token)
+                        .execute(cancelEventRequest)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::deleteEvent);
+                getRouter().handleBack();
             });
             btnEdit.setOnClickListener(v -> {
                 //TODO редактирование
@@ -125,7 +136,8 @@ public class AdvancedViewController extends BaseController {
         }
 
     }
-    private void deleteEvent(boolean deletion){
+
+    private void deleteEvent(boolean deletion) {
 
     }
 

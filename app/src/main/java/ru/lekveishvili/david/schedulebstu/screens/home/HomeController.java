@@ -76,11 +76,11 @@ public class HomeController extends BaseController {
             if (month < 10) {
                 strMonth = 0 + strMonth;
             }
-            ////
-            //TODO
-            strMonth = "09";
-            ////
             int day = instance.get(Calendar.DAY_OF_MONTH);
+            String strDay = String.valueOf(instance.get(Calendar.DAY_OF_MONTH));
+            if (day < 10) {
+                strDay = 0 + strDay;
+            }
             if (all.get(0).getTypeUser().equals("Гость")) {
                 btnGoToAuth.setVisibility(View.VISIBLE);
                 btnGoToAuth.setOnClickListener(v -> {
@@ -95,7 +95,7 @@ public class HomeController extends BaseController {
 
             }
             if (all.get(0).getTypeUser().equals("Студент")) {
-                String strDate = year + "-" + strMonth + "-" + day;
+                String strDate = year + "-" + strMonth + "-" + strDay;
                 String strGroup = all.get(0).getGroups().get(0).getName();
 
 
@@ -109,9 +109,8 @@ public class HomeController extends BaseController {
                         .subscribe(this::setModel);
             }
             if (all.get(0).getTypeUser().equals("Преподаватель")) {
-                String strDate = year + "-" + strMonth + "-" + day;
+                String strDate = year + "-" + strMonth + "-" + strDay;
                 String strLecture = all.get(0).getFullName();
-
 
                 GetEventWeekUseCase getEventWeekUseCase = new GetEventWeekUseCase(
                         apiService,
@@ -120,7 +119,7 @@ public class HomeController extends BaseController {
                 getEventWeekUseCase.executeBasicTeacher()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::setModel);
+                        .subscribe(this::setModelTeacher);
             }
 
         }
@@ -202,6 +201,69 @@ public class HomeController extends BaseController {
                 });
             }
         }
+    }
+
+    private Date getStartWeek() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            cal.add(Calendar.DATE, -1);
+        }
+        return cal.getTime();
+    }
+
+    private Date getEndWeek() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+            cal.add(Calendar.DATE, 1);
+        }
+        return cal.getTime();
+    }
+
+    private void setModelTeacher(RealmList<Event> events) {
+        List<Event> eventList = new ArrayList<>();
+
+        realm.beginTransaction();
+        RealmResults<Event> all = realm.where(Event.class).findAll();
+        all.deleteAllFromRealm();
+        for (int i = 0; i < events.size(); i++) {
+            realm.copyToRealm(events.get(i));
+        }
+        realm.commitTransaction();
+        RealmResults<Authorization> authorizations = realm.where(Authorization.class).findAll();
+        String fullName = authorizations.get(0).getFullName();
+
+        RealmResults<Event> groups = realm.where(Event.class)
+                .equalTo("teachers.fullName", fullName)
+                .between("startEvent", getStartWeek(), getEndWeek())
+                .findAllSorted("startEvent");
+        eventList = realm.copyFromRealm(groups);
+
+        NewPager newPager = new NewPager(eventList);
+        viewPager.setAdapter(newPager);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                viewPager.setCurrentItem(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        int t = 4;
+
     }
 
     private void configureToolbar() {

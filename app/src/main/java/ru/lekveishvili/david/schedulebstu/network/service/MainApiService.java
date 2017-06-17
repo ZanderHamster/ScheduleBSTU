@@ -11,6 +11,8 @@ import ru.lekveishvili.david.schedulebstu.network.models.AuthResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.CancelEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.models.CancelEventResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.ClassTimeResponse;
+import ru.lekveishvili.david.schedulebstu.network.models.CreateEventRequest;
+import ru.lekveishvili.david.schedulebstu.network.models.CreateEventResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventTypesResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventWeekResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.GroupResponse;
@@ -52,7 +54,10 @@ public interface MainApiService {
 
     @GET("/event/week/{date}/lecture/{lecture}")
     Observable<EventWeekResponse> getEventsWeekLecture(@Path("date") String date,
-                                                     @Path("lecture") String lecture);
+                                                       @Path("lecture") String lecture);
 
+    @POST("event")
+    Observable<CreateEventResponse> createEvent(@Header("X-Auth-Token") String token,
+                                                @Body CreateEventRequest createEventRequest);
 
 }

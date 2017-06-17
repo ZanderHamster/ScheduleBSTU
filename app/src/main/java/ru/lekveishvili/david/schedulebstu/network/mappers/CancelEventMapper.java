@@ -11,7 +11,10 @@ public class CancelEventMapper {
     }
 
     public boolean transform(CancelEventResponse cancelEventResponse) {
-
-        return true;
+        if (cancelEventResponse.message.equals("OK")) {
+            return true;
+        }else {
+            return false;
+        }
     }
 }
