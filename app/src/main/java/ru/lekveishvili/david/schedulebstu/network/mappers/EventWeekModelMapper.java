@@ -26,83 +26,76 @@ public class EventWeekModelMapper {
         this.mainApiService = mainApiService;
     }
 
-    public RealmList<Event> transformOther(EventWeekResponse eventWeekResponse) {
-        RealmList<Event> result = new RealmList<>();
-        for (int i = 0; i < eventWeekResponse.timetable.size(); i++) {
-            for (int j = 0; j < eventWeekResponse.timetable.get(i).other.size(); j++) {
-                EventWeekResponse.Other other = eventWeekResponse.timetable.get(i).other.get(j);
-                // Дата и время события
-                String strDate = other.date.date; //"2017-09-11"
-                String start = other.classTime.time.start; //"13:20"
-                String end = other.classTime.time.end; //"15:05"
-                String strFullDateStart = strDate + " " + start;
-                String strFullDateEnd = strDate + " " + end;
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", new Locale("ru", "RU"));
-                Date dateStart = new Date();
-                Date dateEnd = new Date();
-                try {
-                    dateStart = dateFormat.parse(strFullDateStart);
-                    dateEnd = dateFormat.parse(strFullDateEnd);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                // Тип события
-                EventType eventType = EventType.newBuilder()
-                        .withName(other.eventType.name)
-                        .withId(other.eventType.id)
-                        .build();
-                // Группы принимающие участие в событии
-                RealmList<Group> groups = new RealmList<>();
-                for (int k = 0; k < other.groups.size(); k++) {
-                    groups.add(Group.newBuilder()
-                            .withId(other.groups.get(k).id)
-                            .withName(other.groups.get(k).name)
-                            .build());
-                }
-                // Аудитория
-                Room room = Room.newBuilder()
-                        .withId(other.lectureHall.id)
-                        .withName(other.lectureHall.name)
-                        .build();
-                // Преподаватели принимающие участие в событии
-                RealmList<Teacher> teachers = new RealmList<>();
-                for (int k = 0; k < other.lecturer.size(); k++) {
-                    String[] parts = other.lecturer.get(k).name.split(" ");
-                    teachers.add(Teacher.newBuilder()
-                            .withFirstName(parts[0])
-                            .withSecondName(parts[1])
-                            .withThirdName(parts[2])
-                            .withId(other.lecturer.get(k).id)
-                            .withFullName(other.lecturer.get(k).name)
-                            .build());
-                }
-                // Предмет
-                Subject subject = Subject.newBuilder()
-                        .withName(other.subject.name)
-                        .withId(other.subject.id)
-                        .build();
-
-                result.add(Event.newBuilder()
-                        .withId(other.id)
-                        .withStartEvent(dateStart)
-                        .withEndEvent(dateEnd)
-                        .withEventType(eventType)
-                        .withGroups(groups)
-                        .withRoom(room)
-                        .withTeachers(teachers)
-                        .withSubject(subject)
-                        .build());
-            }
-        }
-        return result;
-    }
-
 
     public RealmList<Event> transformBasic(EventWeekResponse eventWeekResponse) {
         RealmList<Event> result = new RealmList<>();
         if (eventWeekResponse.timetable != null) {
-
             for (int i = 0; i < eventWeekResponse.timetable.size(); i++) {
+                for (int j = 0; j < eventWeekResponse.timetable.get(i).other.size(); j++) {
+                    EventWeekResponse.Other other = eventWeekResponse.timetable.get(i).other.get(j);
+                    // Дата и время события
+                    String strDate = other.date.date; //"2017-09-11"
+                    String start = other.classTime.time.start; //"13:20"
+                    String end = other.classTime.time.end; //"15:05"
+                    String strFullDateStart = strDate + " " + start;
+                    String strFullDateEnd = strDate + " " + end;
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", new Locale("ru", "RU"));
+                    Date dateStart = new Date();
+                    Date dateEnd = new Date();
+                    try {
+                        dateStart = dateFormat.parse(strFullDateStart);
+                        dateEnd = dateFormat.parse(strFullDateEnd);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    // Тип события
+                    EventType eventType = EventType.newBuilder()
+                            .withName(other.eventType.name)
+                            .withId(other.eventType.id)
+                            .build();
+                    // Группы принимающие участие в событии
+                    RealmList<Group> groups = new RealmList<>();
+                    for (int k = 0; k < other.groups.size(); k++) {
+                        groups.add(Group.newBuilder()
+                                .withId(other.groups.get(k).id)
+                                .withName(other.groups.get(k).name)
+                                .build());
+                    }
+                    // Аудитория
+                    Room room = Room.newBuilder()
+                            .withId(other.lectureHall.id)
+                            .withName(other.lectureHall.name)
+                            .build();
+                    // Преподаватели принимающие участие в событии
+                    RealmList<Teacher> teachers = new RealmList<>();
+                    for (int k = 0; k < other.lecturer.size(); k++) {
+                        String[] parts = other.lecturer.get(k).name.split(" ");
+                        teachers.add(Teacher.newBuilder()
+                                .withFirstName(parts[0])
+                                .withSecondName(parts[1])
+                                .withThirdName(parts[2])
+                                .withId(other.lecturer.get(k).id)
+                                .withFullName(other.lecturer.get(k).name)
+                                .build());
+                    }
+                    // Предмет
+                    Subject subject = Subject.newBuilder()
+                            .withName(other.subject.name)
+                            .withId(other.subject.id)
+                            .build();
+
+                    result.add(Event.newBuilder()
+                            .withId(other.id)
+                            .withStartEvent(dateStart)
+                            .withEndEvent(dateEnd)
+                            .withEventType(eventType)
+                            .withGroups(groups)
+                            .withRoom(room)
+                            .withTeachers(teachers)
+                            .withSubject(subject)
+                            .build());
+                }
+
                 // Basic
                 for (int j = 0; j < eventWeekResponse.timetable.get(i).basic.size(); j++) {
                     boolean nextWeek = false;

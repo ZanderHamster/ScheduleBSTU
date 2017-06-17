@@ -20,7 +20,7 @@ import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapt
 
 public class NewPager extends PagerAdapter {
     private final static int WEEKS_IN_YEAR = 52;
-    List<Event> eventList;
+    List<Event> eventList = new ArrayList<>();
 
 
     private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
@@ -45,40 +45,11 @@ public class NewPager extends PagerAdapter {
         return view.equals(object);
     }
 
-
-//    private void executeGroup() {
-//        new GetEventWeekUseCase(apiService, token, strDate, person)
-//                .executeTeacher()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::setModelGroup);
-//    }
-
-
-//    private void setModelGroup(RealmList<Event> events) {
-//        realm.beginTransaction();
-//        RealmResults<Event> all = realm.where(Event.class).findAll();
-//        all.deleteAllFromRealm();
-//        for (int i = 0; i < events.size(); i++) {
-//            realm.copyToRealm(events.get(i));
-//        }
-//        realm.commitTransaction();
-//        RealmResults<Authorization> authorizations = realm.where(Authorization.class).findAll();
-//        String fullName = authorizations.get(0).getFullName();
-//
-//        RealmResults<Event> groups = realm.where(Event.class)
-//                .equalTo("groups.name", person)
-//                .between("startEvent", getStartWeek(cal.getTime()), getEndWeek(cal.getTime()))
-//                .findAllSorted("startEvent");
-//        eventList.clear();
-//        eventList = realm.copyFromRealm(groups);
-//    }
-
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         RecyclerView recyclerView = new RecyclerView(container.getContext());
+        specificationsSectionAdapter.removeAllSections();
         if (eventList.size() != 0) {
-            specificationsSectionAdapter.removeAllSections();
             boolean flag = false;
             Calendar calFirstEvent = Calendar.getInstance();
             calFirstEvent.setTime(eventList.get(0).getStartEvent());
@@ -118,6 +89,11 @@ public class NewPager extends PagerAdapter {
                 section.setOnItemClickListener(item -> onItemClickListenerr.onClick(item));
 
             }
+        } else {
+            HomeSectionAdapter section = new HomeSectionAdapter("Нет событий",
+                    new ArrayList<>());
+            specificationsSectionAdapter.addSection(
+                    section);
         }
         specificationsSectionAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));

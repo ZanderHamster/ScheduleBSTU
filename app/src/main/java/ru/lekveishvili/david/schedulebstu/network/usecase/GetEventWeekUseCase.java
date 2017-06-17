@@ -27,12 +27,6 @@ public class GetEventWeekUseCase {
                 .map(mapper::transformBasic);
     }
 
-    public Observable<RealmList<Event>> executeOtherGroup() {
-        EventWeekModelMapper mapper = new EventWeekModelMapper(mainApiService);
-        return mainApiService.getEventsWeekGroup(date, groupOrLecture)
-                .map(mapper::transformOther);
-    }
-
     public Observable<RealmList<Event>> executeTeacher() {
         EventWeekModelMapper mapper = new EventWeekModelMapper(mainApiService);
         return mainApiService.getEventsWeekLecture(date, groupOrLecture)

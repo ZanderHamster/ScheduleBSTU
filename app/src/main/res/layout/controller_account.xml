@@ -66,6 +66,7 @@
 
 
         <Button
+            android:layout_marginBottom="8dp"
             android:id="@+id/account_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
