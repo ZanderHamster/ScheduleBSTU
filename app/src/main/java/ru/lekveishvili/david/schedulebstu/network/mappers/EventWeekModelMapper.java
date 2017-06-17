@@ -214,16 +214,18 @@ public class EventWeekModelMapper {
 
                     // от calTime с каким то шагом до dateEndPeriod
                     while (cal.getTime().getTime() <= dateEndPeriod.getTime()) {
-                        result.add(Event.newBuilder()
-                                .withId(basic.id)
-                                .withStartEvent(dateStart)
-                                .withEndEvent(dateEnd)
-                                .withEventType(eventType)
-                                .withGroups(groups)
-                                .withRoom(room)
-                                .withTeachers(teachers)
-                                .withSubject(subject)
-                                .build());
+                        if (basic.changeData == null) {
+                            result.add(Event.newBuilder()
+                                    .withId(basic.id)
+                                    .withStartEvent(dateStart)
+                                    .withEndEvent(dateEnd)
+                                    .withEventType(eventType)
+                                    .withGroups(groups)
+                                    .withRoom(room)
+                                    .withTeachers(teachers)
+                                    .withSubject(subject)
+                                    .build());
+                        }
                         if (basic.date.drop == 1 || basic.date.drop == 2) {
                             cal.add(Calendar.DATE, 14);
                             startCalendar.add(Calendar.DATE, 14);
@@ -233,6 +235,7 @@ public class EventWeekModelMapper {
                             startCalendar.add(Calendar.DATE, 7);
                             endCalendar.add(Calendar.DATE, 7);
                         }
+
                         dateStart = startCalendar.getTime();
                         dateEnd = endCalendar.getTime();
                     }

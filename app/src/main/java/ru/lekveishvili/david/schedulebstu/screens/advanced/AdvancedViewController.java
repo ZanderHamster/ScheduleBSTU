@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bluelinelabs.conductor.RouterTransaction;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,6 +32,7 @@ import ru.lekveishvili.david.schedulebstu.network.models.CancelEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetDeleteEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
+import ru.lekveishvili.david.schedulebstu.screens.home.HomeController;
 
 public class AdvancedViewController extends BaseController {
     private Event advancedEvent;
@@ -110,7 +113,7 @@ public class AdvancedViewController extends BaseController {
             btnDelete.setVisibility(View.VISIBLE);
             btnEdit.setVisibility(View.VISIBLE);
             btnDelete.setOnClickListener(v -> {
-                //TODO удаление
+
                 String token = "";
                 RealmResults<Authorization> accounts = realm.where(Authorization.class).findAll();
                 if (accounts.size() != 0) {
@@ -123,12 +126,21 @@ public class AdvancedViewController extends BaseController {
                 cancelEventRequest.id = advancedEvent.getId();
                 cancelEventRequest.date = df.format(startEvent);
 
+                realm.beginTransaction();
+                realm.where(Event.class)
+                        .equalTo("id", advancedEvent.getId())
+                        .equalTo("startEvent", advancedEvent.getStartEvent())
+                        .equalTo("endEvent", advancedEvent.getEndEvent())
+                        .findAll()
+                        .deleteFirstFromRealm();
+                realm.commitTransaction();
+
                 new GetDeleteEventDataUseCase(apiService, token)
                         .execute(cancelEventRequest)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::deleteEvent);
-                getRouter().handleBack();
+                getRouter().setRoot(RouterTransaction.with(new HomeController()));
             });
             btnEdit.setOnClickListener(v -> {
                 //TODO редактирование

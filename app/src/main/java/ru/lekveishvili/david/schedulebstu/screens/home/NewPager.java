@@ -20,13 +20,19 @@ import ru.lekveishvili.david.schedulebstu.screens.home.adapters.HomeSectionAdapt
 
 public class NewPager extends PagerAdapter {
     private final static int WEEKS_IN_YEAR = 52;
-    private List<Event> eventList = new ArrayList<>();
+    List<Event> eventList;
+
 
     private final SectionedRecyclerViewAdapter specificationsSectionAdapter = new SectionedRecyclerViewAdapter();
     public ItemClickListener onItemClickListenerr;
 
+
     public NewPager(List<Event> eventList) {
         this.eventList = eventList;
+    }
+
+    public void setEventList(List<Event> list) {
+        eventList = list;
     }
 
     @Override
@@ -39,59 +45,89 @@ public class NewPager extends PagerAdapter {
         return view.equals(object);
     }
 
+
+//    private void executeGroup() {
+//        new GetEventWeekUseCase(apiService, token, strDate, person)
+//                .executeTeacher()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::setModelGroup);
+//    }
+
+
+//    private void setModelGroup(RealmList<Event> events) {
+//        realm.beginTransaction();
+//        RealmResults<Event> all = realm.where(Event.class).findAll();
+//        all.deleteAllFromRealm();
+//        for (int i = 0; i < events.size(); i++) {
+//            realm.copyToRealm(events.get(i));
+//        }
+//        realm.commitTransaction();
+//        RealmResults<Authorization> authorizations = realm.where(Authorization.class).findAll();
+//        String fullName = authorizations.get(0).getFullName();
+//
+//        RealmResults<Event> groups = realm.where(Event.class)
+//                .equalTo("groups.name", person)
+//                .between("startEvent", getStartWeek(cal.getTime()), getEndWeek(cal.getTime()))
+//                .findAllSorted("startEvent");
+//        eventList.clear();
+//        eventList = realm.copyFromRealm(groups);
+//    }
+
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         RecyclerView recyclerView = new RecyclerView(container.getContext());
-        specificationsSectionAdapter.removeAllSections();
-        boolean flag = false;
-        Calendar calFirstEvent = Calendar.getInstance();
-        calFirstEvent.setTime(eventList.get(0).getStartEvent());
+        if (eventList.size() != 0) {
+            specificationsSectionAdapter.removeAllSections();
+            boolean flag = false;
+            Calendar calFirstEvent = Calendar.getInstance();
+            calFirstEvent.setTime(eventList.get(0).getStartEvent());
 
-        List<Event> eventsFromOneDay = new ArrayList<>();
-        for (int i = 0; i < eventList.size(); i++) {
-            Event event = eventList.get(i);
-            Calendar calCurrentEvent = Calendar.getInstance();
-            calCurrentEvent.setTime(event.getStartEvent());
+            List<Event> eventsFromOneDay = new ArrayList<>();
+            for (int i = 0; i < eventList.size(); i++) {
+                Event event = eventList.get(i);
+                Calendar calCurrentEvent = Calendar.getInstance();
+                calCurrentEvent.setTime(event.getStartEvent());
 
-            if (calFirstEvent.get(Calendar.DAY_OF_YEAR) == calCurrentEvent.get(Calendar.DAY_OF_YEAR)) {
-                eventsFromOneDay.add(event);
-            } else {
-                flag = true;
-                calFirstEvent.add(Calendar.DATE, 1);
+                if (calFirstEvent.get(Calendar.DAY_OF_YEAR) == calCurrentEvent.get(Calendar.DAY_OF_YEAR)) {
+                    eventsFromOneDay.add(event);
+                } else {
+                    flag = true;
+                    calFirstEvent.add(Calendar.DATE, 1);
+                    HomeSectionAdapter section = new HomeSectionAdapter(convertDateToString(
+                            new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
+                            new ArrayList<>(eventsFromOneDay));
+                    specificationsSectionAdapter.addSection(
+                            section);
+                    section.setOnItemClickListener(item -> onItemClickListenerr.onClick(item));
+                    eventsFromOneDay.clear();
+                    eventsFromOneDay.add(event);
+                }
+                if (i == eventList.size() - 1) {
+                    flag = false;
+                }
+
+
+            }
+            if (!flag) {
                 HomeSectionAdapter section = new HomeSectionAdapter(convertDateToString(
                         new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
                         new ArrayList<>(eventsFromOneDay));
                 specificationsSectionAdapter.addSection(
                         section);
                 section.setOnItemClickListener(item -> onItemClickListenerr.onClick(item));
-                eventsFromOneDay.clear();
-                eventsFromOneDay.add(event);
+
             }
-            if (i == eventList.size() - 1) {
-                flag = false;
-            }
-
-
-        }
-        if (!flag) {
-            HomeSectionAdapter section = new HomeSectionAdapter(convertDateToString(
-                    new ArrayList<>(eventsFromOneDay).get(0).getStartEvent()),
-                    new ArrayList<>(eventsFromOneDay));
-            specificationsSectionAdapter.addSection(
-                    section);
-            section.setOnItemClickListener(item -> onItemClickListenerr.onClick(item));
-
         }
         specificationsSectionAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
         recyclerView.setAdapter(specificationsSectionAdapter);
         container.addView(recyclerView);
 
-
         return recyclerView;
     }
 
-    public void setOnItemClickListener(ItemClickListener listener) {
+    void setOnItemClickListener(ItemClickListener listener) {
         this.onItemClickListenerr = listener;
     }
 
@@ -147,7 +183,6 @@ public class NewPager extends PagerAdapter {
         }
         return dayOfWeek + ", " + dateMonth.format(date) + " " + monthOfYear;
     }
-
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {

@@ -295,7 +295,7 @@ public class ParentController extends BaseController {
                     .subscribe(
                             this::setClassTime
                     );
-//            getEventWeekUseCase.executeBasicGroup()
+//            getEventWeekUseCase.executeGroup()
 //                    .subscribeOn(Schedulers.io())
 //                    .observeOn(AndroidSchedulers.mainThread())
 //                    .subscribe(

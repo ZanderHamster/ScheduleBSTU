@@ -33,8 +33,21 @@ public class EventWeekResponse {
         public Subject subject;
         @SerializedName("id")
         public String id;
+        @SerializedName("changeData")
+        public ChangeData changeData;
 
     }
+    public class ChangeData {
+
+        @SerializedName("changeText")
+        public String changeText;
+        @SerializedName("changeType")
+        public Integer changeType;
+        @SerializedName("changeId")
+        public String changeId;
+
+    }
+
     public class Other {
         @SerializedName("date")
         public DateOther date;
