@@ -103,11 +103,11 @@ public class NewPager extends PagerAdapter {
         return recyclerView;
     }
 
-    void setOnItemClickListener(ItemClickListener listener) {
+    public void setOnItemClickListener(ItemClickListener listener) {
         this.onItemClickListenerr = listener;
     }
 
-    interface ItemClickListener {
+    public interface ItemClickListener {
         void onClick(Event event);
     }
 

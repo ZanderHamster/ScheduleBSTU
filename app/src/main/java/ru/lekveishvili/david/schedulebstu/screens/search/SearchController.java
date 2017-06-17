@@ -15,9 +15,10 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bluelinelabs.conductor.RouterTransaction;
+
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -28,11 +29,17 @@ import ru.lekveishvili.david.schedulebstu.models.Group;
 import ru.lekveishvili.david.schedulebstu.models.Teacher;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 import ru.lekveishvili.david.schedulebstu.screens.search.adapters.NothingSelectedSpinnerAdapter;
+import ru.lekveishvili.david.schedulebstu.screens.search_pager.SearchPagerController;
 
 public class SearchController extends BaseController {
     private boolean isSetTeacher = false;
     private boolean isSetGroup = false;
     private boolean isSetDate = false;
+
+    private String teacherDate = "";
+    private String teacherName = "";
+    private String groupDate = "";
+    private String groupName = "";
 
     @BindView(R.id.search_toolbar_title)
     TextView toolbarTitle;
@@ -83,12 +90,12 @@ public class SearchController extends BaseController {
 
         realm = Realm.getDefaultInstance();
         configureToolbar();
+
         configureTabs();
-        configureList();
         configureSpinnerGroups();
         configureSpinnerTeachers();
-
         configureDatePicker();
+
         configureSearch();
     }
 
@@ -96,16 +103,16 @@ public class SearchController extends BaseController {
         btnSearch.setOnClickListener(v -> {
             if (isSetDate && isSetTeacher) {
                 Toast.makeText(getActivity(), "1", Toast.LENGTH_SHORT).show();
+                getRouter().pushController(RouterTransaction.with(new SearchPagerController(teacherName, teacherDate)));
             }
             if (isSetDate && isSetGroup) {
                 Toast.makeText(getActivity(), "2", Toast.LENGTH_SHORT).show();
+                getRouter().pushController(RouterTransaction.with(new SearchPagerController(groupName, groupDate)));
             }
         });
     }
 
     private void configureDatePicker() {
-//        setVisibilityResetTeacherDate(true);
-
         teacherDateLayout.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
             new DatePickerDialog(
@@ -133,11 +140,21 @@ public class SearchController extends BaseController {
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.MONTH, month);
         cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        Date date = cal.getTime();
         month += 1;
         setVisibilityResetTeacherDate(true);
-        tvTeacherDate.setText(dayOfMonth + "/" + month + "/" + year);
+        String strMonth = String.valueOf(cal.get(Calendar.MONTH) + 1);
+        if (month < 10) {
+            strMonth = 0 + strMonth;
+        }
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        String strDay = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+        if (day < 10) {
+            strDay = 0 + strDay;
+        }
+        tvTeacherDate.setText(strDay + "/" + strMonth + "/" + year);
+        teacherDate = year + "-" + strMonth + "-" + strDay;
         resetTeacherDate.setOnClickListener(v -> {
+            teacherDate = "";
             setVisibilityResetTeacherDate(false);
         });
     }
@@ -147,11 +164,21 @@ public class SearchController extends BaseController {
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.MONTH, month);
         cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        Date date = cal.getTime();
         month += 1;
         setVisibilityResetGroupDate(true);
-        tvGroupDate.setText(dayOfMonth + "/" + month + "/" + year);
+        String strMonth = String.valueOf(cal.get(Calendar.MONTH) + 1);
+        if (month < 10) {
+            strMonth = 0 + strMonth;
+        }
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        String strDay = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+        if (day < 10) {
+            strDay = 0 + strDay;
+        }
+        tvGroupDate.setText(strDay + "/" + strMonth + "/" + year);
+        groupDate = year + "-" + strMonth + "-" + strDay;
         resetGroupDate.setOnClickListener(v -> {
+            groupDate = "";
             setVisibilityResetGroupDate(false);
         });
     }
@@ -208,6 +235,7 @@ public class SearchController extends BaseController {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != 0) {
+                    groupName = groupsList.get(position - 1);
                     setVisibilityResetGroup(true);
                 }
             }
@@ -245,6 +273,7 @@ public class SearchController extends BaseController {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != 0) {
+                    teacherName = teachersList.get(position - 1);
                     setVisibilityResetTeacher(true);
                 }
             }
@@ -255,6 +284,7 @@ public class SearchController extends BaseController {
             }
         });
         resetTeacher.setOnClickListener(v -> {
+            teacherName = "";
             teacherSpinner.setSelection(0);
             setVisibilityResetTeacher(false);
         });
@@ -309,9 +339,6 @@ public class SearchController extends BaseController {
             ivGroupDateIcon.setVisibility(View.VISIBLE);
             resetGroupDate.setVisibility(View.GONE);
         }
-    }
-
-    private void configureList() {
     }
 
     private void configureToolbar() {
