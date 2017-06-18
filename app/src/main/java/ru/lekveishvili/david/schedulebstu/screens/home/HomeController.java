@@ -95,7 +95,7 @@ public class HomeController extends BaseController {
         newPager.setOnItemClickListener(event -> {
             sessionService.setAdvancedEvent(event);
             getRouter().pushController(
-                    RouterTransaction.with(new AdvancedViewController()));
+                    RouterTransaction.with(new AdvancedViewController("home")));
         });
         ivDate.setOnClickListener(v -> {
             DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
@@ -193,7 +193,7 @@ public class HomeController extends BaseController {
         newPager.setOnItemClickListener(event -> {
             sessionService.setAdvancedEvent(event);
             getRouter().pushController(
-                    RouterTransaction.with(new AdvancedViewController()));
+                    RouterTransaction.with(new AdvancedViewController("home")));
         });
         ivDate.setOnClickListener(v -> {
             DatePickerDialog.OnDateSetListener date = (view, yea, monthOfYea, dayOfMont) -> {
@@ -342,9 +342,9 @@ public class HomeController extends BaseController {
     private Date getEndWeek(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
         while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             cal.add(Calendar.DATE, 1);
         }

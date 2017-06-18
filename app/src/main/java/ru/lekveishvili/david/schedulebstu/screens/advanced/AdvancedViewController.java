@@ -8,8 +8,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bluelinelabs.conductor.RouterTransaction;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,6 +31,8 @@ import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetDeleteEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
 import ru.lekveishvili.david.schedulebstu.screens.home.HomeController;
+import ru.lekveishvili.david.schedulebstu.screens.search_pager.SearchPagerController;
+import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
 
 public class AdvancedViewController extends BaseController {
     private Event advancedEvent;
@@ -61,7 +61,6 @@ public class AdvancedViewController extends BaseController {
     Button btnDelete;
     @BindView(R.id.advanced_edit)
     Button btnEdit;
-
 
     @Inject
     SessionService sessionService;
@@ -140,7 +139,8 @@ public class AdvancedViewController extends BaseController {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::deleteEvent);
-                getRouter().setRoot(RouterTransaction.with(new HomeController()));
+
+                getRouter().handleBack();
             });
             btnEdit.setOnClickListener(v -> {
                 //TODO редактирование
