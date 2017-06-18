@@ -1,15 +1,25 @@
 package ru.lekveishvili.david.schedulebstu.screens.advanced;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -20,6 +30,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import ru.lekveishvili.david.schedulebstu.NotificationPublisher;
 import ru.lekveishvili.david.schedulebstu.R;
 import ru.lekveishvili.david.schedulebstu.ScheduleBSTUApplication;
 import ru.lekveishvili.david.schedulebstu.SessionService;
@@ -30,9 +41,6 @@ import ru.lekveishvili.david.schedulebstu.network.models.CancelEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetDeleteEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
-import ru.lekveishvili.david.schedulebstu.screens.home.HomeController;
-import ru.lekveishvili.david.schedulebstu.screens.search_pager.SearchPagerController;
-import ru.lekveishvili.david.schedulebstu.util.BundleBuilder;
 
 public class AdvancedViewController extends BaseController {
     private Event advancedEvent;
@@ -56,6 +64,10 @@ public class AdvancedViewController extends BaseController {
     TextView tvTeachers;
     @BindView(R.id.advanced_groups)
     TextView tvGroups;
+    @BindView(R.id.advanced_date)
+    TextView tvDate;
+    @BindView(R.id.advanced_notif)
+    ImageView btnNotif;
 
     @BindView(R.id.advanced_delete)
     Button btnDelete;
@@ -73,6 +85,29 @@ public class AdvancedViewController extends BaseController {
         realm = Realm.getDefaultInstance();
         configureToolbar();
         configureInfo();
+
+        btnNotif.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            Calendar current = Calendar.getInstance();
+            cal.setTime(advancedEvent.getStartEvent());
+            if (cal.compareTo(current) <= 0)
+                Toast.makeText(getApplicationContext(), "Событие уже прошло", Toast.LENGTH_SHORT).show();
+            else {
+                Toast.makeText(getApplicationContext(), "Подписка оформленна", Toast.LENGTH_SHORT).show();
+//                scheduleNotification(getNotification(), cal);
+            }
+        });
+    }
+
+    private void scheduleNotification(Notification notification, Calendar targetCal) {
+        Intent notificationIntent = new Intent(getApplicationContext(), NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, notificationIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= 19)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
+        else alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
 
     private void configureInfo() {
@@ -80,10 +115,15 @@ public class AdvancedViewController extends BaseController {
         tvSubject.setText(advancedEvent.getSubject().getName());
         tvEventType.setText(advancedEvent.getEventType().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", new Locale("ru", "RU"));
+        SimpleDateFormat dateFormat2 = new SimpleDateFormat("dd-MM-yyyy", new Locale("ru", "RU"));
         tvTime.setText(
                 dateFormat.format(advancedEvent.getStartEvent()) + "-" +
                         dateFormat.format(advancedEvent.getEndEvent())
         );
+
+        tvDate.setText(dateFormat2.format(advancedEvent.getStartEvent()));
+
+
         tvRoom.setText(advancedEvent.getRoom().getName());
 
         String teachers = "";
@@ -99,6 +139,7 @@ public class AdvancedViewController extends BaseController {
         }
         groups = groups.substring(0, groups.length() - 2);
         tvGroups.setText(groups);
+
 
         RealmResults<Authorization> all = realm.where(Authorization.class).findAll();
         String fullName = all.get(0).getFullName();
@@ -153,6 +194,25 @@ public class AdvancedViewController extends BaseController {
 
     }
 
+    private Notification getNotification() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_date_range_black_24dp);
+        Intent intent = new Intent(getApplicationContext(), NotificationPublisher.class);
+        intent.putExtra("title", "test");
+        intent.putExtra("text", "test");
+        PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
+                .setSmallIcon(R.drawable.ic_date_range_black_24dp)
+                .setLargeIcon(bitmap)
+                .setContentTitle("title")
+                .setContentText("content")
+                .setContentIntent(pIntent)
+                .setAutoCancel(true)
+                .setVibrate(new long[]{1000, 1000, 1000, 1000})
+                .setDefaults(Notification.DEFAULT_SOUND);
+
+        return builder.build();
+    }
+
     @Override
     protected View inflateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
         return inflater.inflate(R.layout.controller_advanced, container, false);
@@ -162,4 +222,6 @@ public class AdvancedViewController extends BaseController {
         btnBack.setOnClickListener(v -> getRouter().handleBack());
         toolbarTitle.setText(getResources().getString(R.string.advanced));
     }
+
+
 }

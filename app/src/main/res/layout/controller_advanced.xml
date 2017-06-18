@@ -36,6 +36,14 @@
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
+            <ImageView
+                android:tint="@color/white"
+                android:id="@+id/advanced_notif"
+                android:padding="12dp"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add_alarm_black_24dp"/>
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
@@ -74,10 +82,19 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/advanced_room"
+            android:id="@+id/advanced_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/advanced_time"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/advanced_room"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/advanced_date"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="12dp" />
 
@@ -120,26 +137,26 @@
             android:textSize="16sp" />
 
         <Button
-            android:layout_marginBottom="8dp"
             android:id="@+id/advanced_delete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="8dp"
             android:background="@color/red"
-            android:visibility="gone"
             android:gravity="center"
-            android:text="Удалить" />
+            android:text="Удалить"
+            android:visibility="gone" />
 
         <Button
-            android:layout_marginBottom="8dp"
             android:id="@+id/advanced_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/advanced_delete"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="8dp"
             android:gravity="center"
-            android:visibility="gone"
-            android:text="Редактировать" />
+            android:text="Редактировать"
+            android:visibility="gone" />
     </RelativeLayout>
 </LinearLayout>

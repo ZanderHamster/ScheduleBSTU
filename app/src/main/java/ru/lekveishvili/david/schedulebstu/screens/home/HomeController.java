@@ -95,7 +95,7 @@ public class HomeController extends BaseController {
         newPager.setOnItemClickListener(event -> {
             sessionService.setAdvancedEvent(event);
             getRouter().pushController(
-                    RouterTransaction.with(new AdvancedViewController("home")));
+                    RouterTransaction.with(new AdvancedViewController()));
         });
         ivDate.setOnClickListener(v -> {
             DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
@@ -193,7 +193,7 @@ public class HomeController extends BaseController {
         newPager.setOnItemClickListener(event -> {
             sessionService.setAdvancedEvent(event);
             getRouter().pushController(
-                    RouterTransaction.with(new AdvancedViewController("home")));
+                    RouterTransaction.with(new AdvancedViewController()));
         });
         ivDate.setOnClickListener(v -> {
             DatePickerDialog.OnDateSetListener date = (view, yea, monthOfYea, dayOfMont) -> {

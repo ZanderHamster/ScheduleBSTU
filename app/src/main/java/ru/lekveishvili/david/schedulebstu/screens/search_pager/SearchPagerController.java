@@ -122,7 +122,7 @@ public class SearchPagerController extends BaseController {
         newPager.setOnItemClickListener(event -> {
             sessionService.setAdvancedEvent(event);
             getRouter().pushController(
-                    RouterTransaction.with(new AdvancedViewController("search")));
+                    RouterTransaction.with(new AdvancedViewController()));
         });
         viewPager.setAdapter(newPager);
         viewPager.setCurrentItem(START_POSITION_PAGER);
@@ -184,7 +184,6 @@ public class SearchPagerController extends BaseController {
         });
     }
 
-
     private void configureTeacher() {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
         Date parse = new Date();
@@ -207,7 +206,7 @@ public class SearchPagerController extends BaseController {
         newPager.setOnItemClickListener(event -> {
             sessionService.setAdvancedEvent(event);
             getRouter().pushController(
-                    RouterTransaction.with(new AdvancedViewController("search")));
+                    RouterTransaction.with(new AdvancedViewController()));
         });
         viewPager.setAdapter(newPager);
         viewPager.setCurrentItem(START_POSITION_PAGER);
