@@ -36,6 +36,11 @@ public class NewPager extends PagerAdapter {
     }
 
     @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
+    }
+
+    @Override
     public int getCount() {
         return WEEKS_IN_YEAR;
     }

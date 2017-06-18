@@ -11,6 +11,7 @@ import ru.lekveishvili.david.schedulebstu.screens.auth.AuthorizationController;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseActivity;
 import ru.lekveishvili.david.schedulebstu.screens.base.ParentController;
 import ru.lekveishvili.david.schedulebstu.screens.core.CoreActivityComponent;
+import ru.lekveishvili.david.schedulebstu.screens.edit.EditController;
 import ru.lekveishvili.david.schedulebstu.screens.home.HomeController;
 import ru.lekveishvili.david.schedulebstu.screens.home.di.HomeComponent;
 import ru.lekveishvili.david.schedulebstu.screens.search_pager.SearchPagerController;
@@ -34,6 +35,8 @@ public interface AppComponent {
     void inject(AdvancedViewController controller);
 
     void inject(SearchPagerController controller);
+
+    void inject(EditController controller);
 
     CoreActivityComponent plus(CoreActivityComponent.CoreActivityModule module);
 

@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bluelinelabs.conductor.RouterTransaction;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -41,6 +43,7 @@ import ru.lekveishvili.david.schedulebstu.network.models.CancelEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.service.MainApiService;
 import ru.lekveishvili.david.schedulebstu.network.usecase.GetDeleteEventDataUseCase;
 import ru.lekveishvili.david.schedulebstu.screens.base.BaseController;
+import ru.lekveishvili.david.schedulebstu.screens.edit.EditController;
 
 public class AdvancedViewController extends BaseController {
     private Event advancedEvent;
@@ -86,29 +89,20 @@ public class AdvancedViewController extends BaseController {
         configureToolbar();
         configureInfo();
 
+        Calendar cal = Calendar.getInstance();
+        Calendar current = Calendar.getInstance();
+        cal.setTime(advancedEvent.getStartEvent());
+        if (cal.compareTo(current) <= 0) {
+            btnNotif.setVisibility(View.GONE);
+        }
+
+
         btnNotif.setOnClickListener(v -> {
-            Calendar cal = Calendar.getInstance();
-            Calendar current = Calendar.getInstance();
-            cal.setTime(advancedEvent.getStartEvent());
-            if (cal.compareTo(current) <= 0)
-                Toast.makeText(getApplicationContext(), "Событие уже прошло", Toast.LENGTH_SHORT).show();
-            else {
-                Toast.makeText(getApplicationContext(), "Подписка оформленна", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Подписка оформленна", Toast.LENGTH_SHORT).show();
 //                scheduleNotification(getNotification(), cal);
-            }
         });
     }
 
-    private void scheduleNotification(Notification notification, Calendar targetCal) {
-        Intent notificationIntent = new Intent(getApplicationContext(), NotificationPublisher.class);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, notificationIntent, 0);
-        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        if (android.os.Build.VERSION.SDK_INT >= 19)
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
-        else alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
-    }
 
     private void configureInfo() {
         advancedEvent = sessionService.getAdvancedEvent();
@@ -184,7 +178,10 @@ public class AdvancedViewController extends BaseController {
                 getRouter().handleBack();
             });
             btnEdit.setOnClickListener(v -> {
-                //TODO редактирование
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+                String date = df.format(advancedEvent.getStartEvent());
+                getRouter().pushController(RouterTransaction.with(
+                        new EditController(advancedEvent.getId(), date)));
             });
         }
 
@@ -211,6 +208,17 @@ public class AdvancedViewController extends BaseController {
                 .setDefaults(Notification.DEFAULT_SOUND);
 
         return builder.build();
+    }
+
+    private void scheduleNotification(Notification notification, Calendar targetCal) {
+        Intent notificationIntent = new Intent(getApplicationContext(), NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, notificationIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= 19)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
+        else alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
 
     @Override

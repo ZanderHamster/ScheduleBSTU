@@ -84,16 +84,19 @@ public class EventWeekModelMapper {
                             .withId(other.subject.id)
                             .build();
 
-                    result.add(Event.newBuilder()
-                            .withId(other.id)
-                            .withStartEvent(dateStart)
-                            .withEndEvent(dateEnd)
-                            .withEventType(eventType)
-                            .withGroups(groups)
-                            .withRoom(room)
-                            .withTeachers(teachers)
-                            .withSubject(subject)
-                            .build());
+                    if (other.changeData == null
+                            || other.changeData.changeText.equals("Событие перенесено на сегодня!")) {
+                        result.add(Event.newBuilder()
+                                .withId(other.id)
+                                .withStartEvent(dateStart)
+                                .withEndEvent(dateEnd)
+                                .withEventType(eventType)
+                                .withGroups(groups)
+                                .withRoom(room)
+                                .withTeachers(teachers)
+                                .withSubject(subject)
+                                .build());
+                    }
                 }
 
                 // Basic
@@ -207,7 +210,8 @@ public class EventWeekModelMapper {
 
                     // от calTime с каким то шагом до dateEndPeriod
                     while (cal.getTime().getTime() <= dateEndPeriod.getTime()) {
-                        if (basic.changeData == null) {
+                        if (basic.changeData == null
+                                || basic.changeData.changeText.equals("Событие перенесено на сегодня!")) {
                             result.add(Event.newBuilder()
                                     .withId(basic.id)
                                     .withStartEvent(dateStart)

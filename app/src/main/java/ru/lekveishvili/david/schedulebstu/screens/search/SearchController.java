@@ -102,12 +102,10 @@ public class SearchController extends BaseController {
     private void configureSearch() {
         btnSearch.setOnClickListener(v -> {
             if (isSetDate && isSetTeacher) {
-                Toast.makeText(getActivity(), "1", Toast.LENGTH_SHORT).show();
                 getRouter().pushController(RouterTransaction.with(
                         new SearchPagerController(teacherName, teacherDate, "Преподаватели")));
             }
             if (isSetDate && isSetGroup) {
-                Toast.makeText(getActivity(), "2", Toast.LENGTH_SHORT).show();
                 getRouter().pushController(RouterTransaction.with(new SearchPagerController(groupName, groupDate, "Группы")));
             }
         });

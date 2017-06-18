@@ -107,79 +107,87 @@ public class CreateNewEventController extends BaseController {
         configureDate();
 
         btnCreateEvent.setOnClickListener(v -> {
-            MainApiService apiService = RetrofitClient.getMainApiService();
+            if (spinnerStartEvent.getSelectedItemPosition() != 0
+                    && spinnerEventType.getSelectedItemPosition() != 0
+                    && spinnerRoom.getSelectedItemPosition() != 0
+                    && spinnerGroup.getSelectedItemPosition() != 0
+                    && spinnerSubject.getSelectedItemPosition() != 0
+                    && !tvDate.getText().equals("Выбрать дату")) {
+                MainApiService apiService = RetrofitClient.getMainApiService();
 
-            String teacherName = "";
-            String token = "";
-            RealmResults<Authorization> accounts = realm.where(Authorization.class).findAll();
-            if (accounts.size() != 0) {
-                teacherName = accounts.get(0).getFullName();
-                token = accounts.get(0).getToken();
+                String teacherName = "";
+                String token = "";
+                RealmResults<Authorization> accounts = realm.where(Authorization.class).findAll();
+                if (accounts.size() != 0) {
+                    teacherName = accounts.get(0).getFullName();
+                    token = accounts.get(0).getToken();
+                }
+                RealmResults<Teacher> fullName = realm.where(Teacher.class)
+                        .equalTo("fullName", teacherName)
+                        .findAll();
+                List<String> lecturers = new ArrayList<>();
+                if (fullName.size() != 0) {
+                    lecturers.add(fullName.get(0).getId());
+                }
+
+                Date startEvent = newEvent.getStartEvent();
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
+                String date = df.format(startEvent);
+
+
+                CreateEventRequest createEventRequest = new CreateEventRequest();
+                createEventRequest.subject = new CreateEventRequest.Subject();
+                createEventRequest.groups = new ArrayList<>();
+                createEventRequest.lectureHall = new CreateEventRequest.LectureHall();
+                createEventRequest.eventType = new CreateEventRequest.EventType();
+                createEventRequest.classTime = new CreateEventRequest.ClassTime();
+                createEventRequest.lecturer = new ArrayList<>();
+                createEventRequest.date = new CreateEventRequest.Date();
+
+
+                CreateEventRequest.Group group = new CreateEventRequest.Group();
+                group.id = newEvent.getGroups().get(0).getId();
+                CreateEventRequest.Lecturer lecturer = new CreateEventRequest.Lecturer();
+                lecturer.id = lecturers.get(0);
+
+                createEventRequest.subject.id = newEvent.getSubject().getId();
+                createEventRequest.groups.add(group);
+                createEventRequest.lectureHall.id = newEvent.getRoom().getId();
+                createEventRequest.eventType.id = newEvent.getEventType().getId();
+                createEventRequest.classTime.id = newEvent.getTimeId();
+                createEventRequest.lecturer.add(lecturer);
+                createEventRequest.date.date = date;
+
+
+                new GetCreateEventDataUseCase(apiService, token).execute(createEventRequest)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                this::createEventMessage,
+                                throwable -> Snackbar.make(btnCreateEvent, "Невозможно создать событие!",
+                                        Snackbar.LENGTH_SHORT).show()
+                        );
             }
-            RealmResults<Teacher> fullName = realm.where(Teacher.class)
-                    .equalTo("fullName", teacherName)
-                    .findAll();
-            List<String> lecturers = new ArrayList<>();
-            if (fullName.size() != 0) {
-                lecturers.add(fullName.get(0).getId());
-            }
-
-            Date startEvent = newEvent.getStartEvent();
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd", new Locale("ru", "RU"));
-            String date = df.format(startEvent);
-
-
-            CreateEventRequest createEventRequest = new CreateEventRequest();
-            createEventRequest.subject = new CreateEventRequest.Subject();
-            createEventRequest.groups = new ArrayList<>();
-            createEventRequest.lectureHall = new CreateEventRequest.LectureHall();
-            createEventRequest.eventType = new CreateEventRequest.EventType();
-            createEventRequest.classTime = new CreateEventRequest.ClassTime();
-            createEventRequest.lecturer = new ArrayList<>();
-            createEventRequest.date = new CreateEventRequest.Date();
-
-
-            CreateEventRequest.Group group = new CreateEventRequest.Group();
-            group.id = newEvent.getGroups().get(0).getId();
-            CreateEventRequest.Lecturer lecturer = new CreateEventRequest.Lecturer();
-            lecturer.id = lecturers.get(0);
-
-            createEventRequest.subject.id = newEvent.getSubject().getId();
-            createEventRequest.groups.add(group);
-            createEventRequest.lectureHall.id = newEvent.getRoom().getId();
-            createEventRequest.eventType.id = newEvent.getEventType().getId();
-            createEventRequest.classTime.id = newEvent.getTimeId();
-            createEventRequest.lecturer.add(lecturer);
-            createEventRequest.date.date = date;
-
-
-            new GetCreateEventDataUseCase(apiService, token).execute(createEventRequest)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            this::createEventMessage,
-                            throwable -> Snackbar.make(btnCreateEvent, "Невозможно создать событие!",
-                                    Snackbar.LENGTH_SHORT).show()
-                    );
         });
+
 
     }
 
     private void createEventMessage(String msg) {
-            spinnerSubject.setSelection(0);
-            setVisibilityResetSubject(false);
-            spinnerGroup.setSelection(0);
-            setVisibilityResetGroup(false);
-            spinnerRoom.setSelection(0);
-            setVisibilityResetRoom(false);
-            spinnerEventType.setSelection(0);
-            setVisibilityResetEventType(false);
-            spinnerStartEvent.setSelection(0);
-            setVisibilityResetStartEvent(false);
-            tvDate.setTextColor(getResources().getColor(R.color.hint_color));
-            tvDate.setText("Выбрать дату");
-            setVisibilityResetDate(false);
-            newEvent = Event.newBuilder().build();
+        spinnerSubject.setSelection(0);
+        setVisibilityResetSubject(false);
+        spinnerGroup.setSelection(0);
+        setVisibilityResetGroup(false);
+        spinnerRoom.setSelection(0);
+        setVisibilityResetRoom(false);
+        spinnerEventType.setSelection(0);
+        setVisibilityResetEventType(false);
+        spinnerStartEvent.setSelection(0);
+        setVisibilityResetStartEvent(false);
+        tvDate.setTextColor(getResources().getColor(R.color.hint_color));
+        tvDate.setText("Выбрать дату");
+        setVisibilityResetDate(false);
+        newEvent = Event.newBuilder().build();
 
         Snackbar.make(btnCreateEvent, msg,
                 Snackbar.LENGTH_SHORT).show();

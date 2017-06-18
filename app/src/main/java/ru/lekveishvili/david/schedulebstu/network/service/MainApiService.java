@@ -13,6 +13,7 @@ import ru.lekveishvili.david.schedulebstu.network.models.CancelEventResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.ClassTimeResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.CreateEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.models.CreateEventResponse;
+import ru.lekveishvili.david.schedulebstu.network.models.EditEventRequest;
 import ru.lekveishvili.david.schedulebstu.network.models.EventTypesResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.EventWeekResponse;
 import ru.lekveishvili.david.schedulebstu.network.models.GroupResponse;
@@ -59,5 +60,8 @@ public interface MainApiService {
     @POST("event")
     Observable<CreateEventResponse> createEvent(@Header("X-Auth-Token") String token,
                                                 @Body CreateEventRequest createEventRequest);
+    @POST("event/eventTransfer")
+    Observable<CancelEventResponse> editEvent(@Header("X-Auth-Token") String token,
+                                                @Body EditEventRequest editEventRequest);
 
 }

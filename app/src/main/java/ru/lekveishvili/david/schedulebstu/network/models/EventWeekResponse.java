@@ -65,6 +65,8 @@ public class EventWeekResponse {
         public Subject subject;
         @SerializedName("id")
         public String id;
+        @SerializedName("changeData")
+        public ChangeData changeData;
 
     }
     public class AcademicPeriod {

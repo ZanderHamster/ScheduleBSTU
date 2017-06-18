@@ -18,6 +18,7 @@
         <EditText
             android:id="@+id/auth_et_password"
             android:layout_width="250dp"
+            android:inputType="number"
             android:layout_height="wrap_content"
             android:layout_below="@+id/auth_et_login"
             android:hint="Password" />

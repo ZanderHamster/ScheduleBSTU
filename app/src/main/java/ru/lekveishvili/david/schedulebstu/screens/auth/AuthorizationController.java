@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.RouterTransaction;
+import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -79,13 +82,12 @@ public class AuthorizationController extends BaseController {
         super.onViewBound(view);
         ScheduleBSTUApplication.getAppComponent(view.getContext())
                 .inject(this);
+
         bottomNavigationService.hide();
         realm = Realm.getDefaultInstance();
 
         MainApiService apiService = RetrofitClient.getMainApiService();
         getAuthorizationUseCase = new GetAuthorizationUseCase(apiService, sessionService.getToken());
-
-        AutoLogin();
 
         btnEnter.setOnClickListener(v -> getAuthorizationUseCase.execute(
                 AuthRequest.newBuilder()
@@ -128,7 +130,7 @@ public class AuthorizationController extends BaseController {
 
     private void AutoLogin() {
         etLogin.setText("lecture");
-        etPassword.setText("k8jD2Mxj");
+        etPassword.setText("321");
     }
 
     @Override
